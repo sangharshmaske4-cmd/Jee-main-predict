@@ -3,30 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JEE College Predictor (Simple)</title>
+<title>JEE Predictor</title>
 
 <style>
 body {
-  font-family: Arial;
+  font-family: system-ui;
   background: #eef3f8;
   padding: 20px;
 }
 
 .card {
+  max-width: 500px;
+  margin: auto;
   background: white;
   padding: 20px;
   border-radius: 15px;
-  max-width: 500px;
-  margin: auto;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
 }
 
 input, select, button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;
+  font-size: 15px;
 }
 
 button {
@@ -37,7 +42,22 @@ button {
 
 .result {
   margin-top: 20px;
+  padding: 15px;
+  background: #f5f8fb;
+  border-radius: 10px;
 }
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.safe { background: #d9f0f5; }
+.target { background: #fff0db; }
+.dream { background: #ffe0d6; }
 </style>
 </head>
 
@@ -47,7 +67,7 @@ button {
   <h2>🎯 JEE College Predictor</h2>
 
   <input type="number" id="marks" placeholder="Enter Marks (0-300)">
-  
+
   <select id="category">
     <option>General</option>
     <option>OBC</option>
@@ -57,20 +77,66 @@ button {
 
   <button onclick="predict()">Predict Colleges</button>
 
-  <div class="result" id="result"></div>
+  <div id="result" class="result"></div>
 </div>
 
 <script>
-function marksToRank(marks) {
-  if(marks > 250) return 1000;
-  if(marks > 200) return 5000;
-  if(marks > 150) return 15000;
-  if(marks > 100) return 40000;
-  if(marks > 50) return 80000;
-  return 150000;
+
+// ---------- MARKS → RANK ----------
+function marksToRank(m) {
+  m = Number(m);
+  if (m >= 300) return 1;
+
+  let percentile = (m / 300) * 100;
+  let total = 1500000;
+
+  return Math.round(total * (100 - percentile) / 100);
 }
 
+// ---------- COLLEGE LOGIC ----------
+function getColleges(rank) {
+
+  if(rank <= 3000) {
+    return [
+      ["NIT Trichy - CSE","safe"],
+      ["NIT Surathkal - CSE","safe"],
+      ["IIIT Hyderabad","target"]
+    ];
+  }
+
+  if(rank <= 10000) {
+    return [
+      ["NIT Warangal - ECE","safe"],
+      ["NIT Surathkal - ECE","target"],
+      ["IIIT Bangalore","dream"]
+    ];
+  }
+
+  if(rank <= 30000) {
+    return [
+      ["NIT Bhopal - Mechanical","safe"],
+      ["NIT Calicut - Electrical","target"],
+      ["IIIT Jabalpur","dream"]
+    ];
+  }
+
+  if(rank <= 80000) {
+    return [
+      ["NIT Patna","safe"],
+      ["NIT Raipur","safe"],
+      ["NIT Silchar","target"]
+    ];
+  }
+
+  return [
+    ["GFTI Colleges","safe"],
+    ["State Govt Colleges","target"]
+  ];
+}
+
+// ---------- MAIN FUNCTION ----------
 function predict() {
+
   let marks = document.getElementById("marks").value;
   let category = document.getElementById("category").value;
 
@@ -81,23 +147,30 @@ function predict() {
 
   let rank = marksToRank(marks);
 
-  let colleges = [];
+  // category advantage
+  if(category === "OBC") rank *= 1.2;
+  if(category === "SC") rank *= 1.5;
+  if(category === "ST") rank *= 1.8;
 
-  if(rank <= 5000) {
-    colleges.push("NIT Trichy - CSE", "NIT Surathkal - CSE");
-  } else if(rank <= 15000) {
-    colleges.push("NIT Warangal - ECE", "IIIT Hyderabad");
-  } else if(rank <= 40000) {
-    colleges.push("NIT Bhopal - Mechanical", "IIIT Jabalpur");
-  } else {
-    colleges.push("NIT Patna", "NIT Raipur", "GFTI Colleges");
-  }
+  rank = Math.round(rank);
 
-  document.getElementById("result").innerHTML = `
-    <b>Estimated Rank:</b> ${rank}<br><br>
-    <b>Colleges:</b><br> ${colleges.join("<br>")}
+  let colleges = getColleges(rank);
+
+  let html = `
+    <h3>📊 Estimated Rank: ${rank}</h3>
+    <h4>🎓 Colleges:</h4>
+    <ul>
   `;
+
+  colleges.forEach(c => {
+    html += `<li>${c[0]} <span class="badge ${c[1]}">${c[1]}</span></li>`;
+  });
+
+  html += "</ul>";
+
+  document.getElementById("result").innerHTML = html;
 }
+
 </script>
 
 </body>
