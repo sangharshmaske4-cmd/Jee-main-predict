@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>JEE Main College Predictor | Advanced</title>
+  <title>JEE Main College Predictor | Advanced + Expanded Dataset</title>
   <style>
     * {
       margin: 0;
@@ -24,11 +24,6 @@
       --result-bg: #f8fafc;
       --college-bg: #eef4fa;
       --shadow: 0 12px 28px rgba(0,0,0,0.08);
-      --safe: #1f6e8c;
-      --target: #c97e0a;
-      --dream: #2b7e3a;
-      --ambi: #b43b0c;
-      --very-safe: #0f7b6e;
     }
 
     body {
@@ -68,7 +63,6 @@
       color: white;
     }
 
-    /* Main card */
     .main-card {
       background: var(--card-bg);
       border-radius: 1.8rem;
@@ -100,7 +94,6 @@
       font-weight: 600;
       text-transform: uppercase;
       color: var(--text-light);
-      letter-spacing: 0.5px;
     }
 
     input, select {
@@ -122,7 +115,6 @@
       padding: 0.6rem 1.2rem;
       font-weight: 600;
       cursor: pointer;
-      font-size: 0.85rem;
     }
 
     .sticky-filters {
@@ -162,7 +154,6 @@
       padding: 1rem;
       border-left: 5px solid var(--accent);
       transition: transform 0.1s, box-shadow 0.2s;
-      position: relative;
     }
     .college-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
 
@@ -179,13 +170,9 @@
 
     .favorite-btn { cursor: pointer; font-size: 1.3rem; background: none; border: none; padding: 0 4px; }
     .compare-checkbox { margin-right: 8px; transform: scale(1.1); cursor: pointer; }
-
     .compare-bar { display: flex; justify-content: space-between; margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: 10px; }
     .export-btn { background: #2c5a6e; }
-
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-content { background: var(--card-bg); border-radius: 1.5rem; max-width: 90%; width: 850px; padding: 1.5rem; max-height: 80vh; overflow: auto; }
-    .close-modal { float: right; font-size: 1.4rem; font-weight: bold; cursor: pointer; }
+    .rank-info { background: #e9ecef; border-radius: 20px; padding: 0.3rem 1rem; font-size: 0.8rem; margin-top: 0.5rem; display: inline-block; }
 
     @media (max-width: 700px) { .college-grid { grid-template-columns: 1fr; } .sticky-filters { flex-direction: column; align-items: stretch; } }
   </style>
@@ -200,27 +187,25 @@
 
   <div id="predictorTab">
     <div class="main-card">
-      <!-- input area -->
       <div class="input-section">
         <div class="flex-row">
-          <div class="input-group"><label>📊 Marks / Rank</label><input type="number" id="userValue" placeholder="e.g., 210 (marks) or 18500 (rank)"></div>
+          <div class="input-group"><label>📊 Marks / Rank</label><input type="number" id="userValue" placeholder="e.g., 45 or 1450000"></div>
           <div class="input-group"><label>🏷️ Category</label><select id="categorySelect"><option>General</option><option>OBC</option><option>SC</option><option>ST</option></select></div>
           <div class="input-group"><label>🏠 Home State</label><input type="text" id="homeState" placeholder="e.g., Maharashtra, Karnataka"></div>
           <div class="input-group"><button id="predictBtn">✨ Predict Colleges</button></div>
         </div>
-        <div class="flex-row" style="margin-top: 10px;"><small>💡 Hint: Enter marks (0-300) OR rank (1-1500000). System auto-detects.</small></div>
+        <div id="rankPreview" class="rank-info" style="margin-top:10px"></div>
+        <div class="flex-row"><small>💡 Hint: Enter marks (0-300) OR rank (1-1500000). System auto-detects.</small></div>
       </div>
 
-      <!-- sticky filters (multi-select using dropdowns) -->
       <div class="sticky-filters">
-        <div class="filter-group"><label>Institute:</label><select id="typeFilter"><option value="all">All</option><option>NIT</option><option>IIIT</option><option>GFTI</option></select></div>
+        <div class="filter-group"><label>Institute:</label><select id="typeFilter"><option value="all">All</option><option>NIT</option><option>IIIT</option><option>GFTI</option><option>StateEngg</option></select></div>
         <div class="filter-group"><label>State:</label><select id="stateFilter"><option value="all">All</option></select></div>
         <div class="filter-group"><label>Branch:</label><select id="branchFilterMulti"><option value="all">All</option></select></div>
         <div class="filter-group"><label>Search:</label><input type="text" id="searchBox" placeholder="college/branch..."></div>
         <div><button id="applyFilters">🔍 Apply</button><button id="resetFilters">⟳ Reset</button></div>
       </div>
 
-      <!-- results display -->
       <div id="resultsArea">
         <div id="collegeList" class="college-grid"></div>
         <div class="compare-bar"><span id="selectedCount">0 colleges selected</span><div><button id="compareBtn">📊 Compare Selected</button><button id="exportCSV" class="export-btn">📎 Export CSV</button></div></div>
@@ -240,10 +225,20 @@
 </div>
 
 <script>
-  // ========================  REALISTIC DATASET (155+ entries) ========================
-  const collegeTemplates = [
+  // ========================  EXPANDED DATASET (200+ entries, ranks up to 1.3M) ========================
+  const TOTAL_CAND = 1500000;
+  // Rank → marks conversion helpers
+  const MARKS_BREAK = [300,280,250,220,190,160,130,100,70,40,20,0];
+  const PERC_BREAK = [100,99.95,99.7,99,98,96,93,85,72,50,25,0];
+  function interp(x,x1,x2,y1,y2) { if(x1===x2) return y1; return y1 + (x-x1)*(y2-y1)/(x2-x1); }
+  function marksToPercentile(m) { if(m>=300) return 100; if(m<=0) return 0; let mm=Math.min(300,Math.max(0,m)); for(let i=0;i<MARKS_BREAK.length-1;i++) if(mm<=MARKS_BREAK[i] && mm>=MARKS_BREAK[i+1]) return interp(mm, MARKS_BREAK[i], MARKS_BREAK[i+1], PERC_BREAK[i], PERC_BREAK[i+1]); return 0; }
+  function percentileToRank(p) { if(p>=100) return 1; if(p<=0) return TOTAL_CAND; return Math.max(1, Math.round(TOTAL_CAND*(100-p)/100)); }
+  function marksToRank(m) { return percentileToRank(marksToPercentile(m)); }
+
+  // ----- Base high-rank colleges (NIT, IIIT, GFTI with cutoffs up to 1.3L) -----
+  const highTier = [
     { name: "NIT Tiruchirappalli", type: "NIT", state: "Tamil Nadu", base: { genOS: [1250,3400], obcOS: [1850,4500], scOS: [7800,12500], stOS: [9500,15500] } },
-    { name: "NIT Karnataka, Surathkal", type: "NIT", state: "Karnataka", base: { genOS: [2100,4100], obcOS: [2900,5300], scOS: [9500,14500], stOS: [11000,17500] } },
+    { name: "NIT Karnataka", type: "NIT", state: "Karnataka", base: { genOS: [2100,4100], obcOS: [2900,5300], scOS: [9500,14500], stOS: [11000,17500] } },
     { name: "NIT Warangal", type: "NIT", state: "Telangana", base: { genOS: [1800,3800], obcOS: [2600,4900], scOS: [8900,13800], stOS: [10500,16800] } },
     { name: "NIT Calicut", type: "NIT", state: "Kerala", base: { genOS: [5600,8900], obcOS: [7100,10900], scOS: [15500,22800], stOS: [18500,26800] } },
     { name: "IIIT Hyderabad", type: "IIIT", state: "Telangana", base: { genOS: [780,2100], obcOS: [1200,2950], scOS: [4300,7800], stOS: [5800,9500] } },
@@ -258,78 +253,94 @@
     { name: "NIT Raipur", type: "NIT", state: "Chhattisgarh", base: { genOS: [43000,56000], obcOS: [51000,68000], scOS: [82000,109000], stOS: [94000,124000] } },
     { name: "IIIT Allahabad", type: "IIIT", state: "Uttar Pradesh", base: { genOS: [13500,19500], obcOS: [16500,24000], scOS: [29000,42000], stOS: [35000,50000] } },
     { name: "IIIT Delhi", type: "IIIT", state: "Delhi", base: { genOS: [8500,13500], obcOS: [11000,17500], scOS: [23000,34000], stOS: [27000,40000] } },
-    { name: "PEC Chandigarh", type: "GFTI", state: "Chandigarh", base: { genOS: [28000,39000], obcOS: [34000,47000], scOS: [55000,74000], stOS: [65000,88000] } },
-    { name: "BIT Mesra", type: "GFTI", state: "Jharkhand", base: { genOS: [32000,45000], obcOS: [38000,53000], scOS: [60000,82000], stOS: [70000,95000] } },
     { name: "NIT Goa", type: "NIT", state: "Goa", base: { genOS: [46000,61000], obcOS: [54000,72000], scOS: [86000,112000], stOS: [98000,129000] } },
     { name: "NIT Puducherry", type: "NIT", state: "Puducherry", base: { genOS: [52000,68000], obcOS: [61000,80000], scOS: [94000,125000], stOS: [107000,142000] } },
-    { name: "IIIT Kottayam", type: "IIIT", state: "Kerala", base: { genOS: [48000,63000], obcOS: [57000,75000], scOS: [88000,118000], stOS: [101000,135000] } },
-    { name: "IIIT Vadodara", type: "IIIT", state: "Gujarat", base: { genOS: [43000,59000], obcOS: [51000,69000], scOS: [82000,112000], stOS: [94000,127000] } },
-    { name: "IIIT Una", type: "IIIT", state: "Himachal Pradesh", base: { genOS: [54000,71000], obcOS: [63000,83000], scOS: [96000,128000], stOS: [109000,145000] } },
     { name: "NIT Meghalaya", type: "NIT", state: "Meghalaya", base: { genOS: [65000,82000], obcOS: [74000,95000], scOS: [108000,140000], stOS: [122000,158000] } },
     { name: "NIT Sikkim", type: "NIT", state: "Sikkim", base: { genOS: [69000,87000], obcOS: [79000,101000], scOS: [114000,148000], stOS: [128000,165000] } }
   ];
 
-  const branchesList = ["Computer Science", "Electronics & Comm.", "Mechanical", "Civil", "Electrical", "Chemical", "Metallurgy", "Biotechnology"];
+  // Lower tier (State Engineering Colleges, GFTI, new IIITs) with cutoffs up to 1.3 million
+  const lowTier = [
+    { name: "College of Engineering Pune (COEP)", type: "StateEngg", state: "Maharashtra", base: { genOS: [85000,125000], obcOS: [110000,165000], scOS: [180000,260000], stOS: [220000,310000] } },
+    { name: "PICT Pune", type: "StateEngg", state: "Maharashtra", base: { genOS: [95000,140000], obcOS: [125000,185000], scOS: [195000,285000], stOS: [240000,340000] } },
+    { name: "DTU Delhi (GFTI)", type: "GFTI", state: "Delhi", base: { genOS: [35000,55000], obcOS: [48000,72000], scOS: [85000,120000], stOS: [98000,145000] } },
+    { name: "NSUT Delhi", type: "GFTI", state: "Delhi", base: { genOS: [40000,62000], obcOS: [53000,80000], scOS: [90000,135000], stOS: [105000,155000] } },
+    { name: "JMI New Delhi", type: "GFTI", state: "Delhi", base: { genOS: [68000,105000], obcOS: [88000,135000], scOS: [140000,210000], stOS: [170000,250000] } },
+    { name: "IIIT Pune", type: "IIIT", state: "Maharashtra", base: { genOS: [50000,78000], obcOS: [65000,98000], scOS: [110000,165000], stOS: [130000,195000] } },
+    { name: "IIIT Kalyani", type: "IIIT", state: "West Bengal", base: { genOS: [68000,102000], obcOS: [85000,130000], scOS: [140000,210000], stOS: [168000,245000] } },
+    { name: "IIIT Sri City", type: "IIIT", state: "Andhra Pradesh", base: { genOS: [72000,110000], obcOS: [92000,142000], scOS: [150000,225000], stOS: [180000,265000] } },
+    { name: "IIIT Nagpur", type: "IIIT", state: "Maharashtra", base: { genOS: [76000,115000], obcOS: [97000,148000], scOS: [158000,238000], stOS: [188000,278000] } },
+    { name: "IIIT Vadodara", type: "IIIT", state: "Gujarat", base: { genOS: [80000,122000], obcOS: [102000,156000], scOS: [168000,252000], stOS: [198000,295000] } },
+    { name: "Government Engineering College, Thrissur", type: "StateEngg", state: "Kerala", base: { genOS: [110000,165000], obcOS: [142000,210000], scOS: [220000,330000], stOS: [260000,390000] } },
+    { name: "Government College of Technology, Coimbatore", type: "StateEngg", state: "Tamil Nadu", base: { genOS: [120000,180000], obcOS: [155000,230000], scOS: [240000,360000], stOS: [285000,425000] } },
+    { name: "University Institute of Technology, Burdwan", type: "StateEngg", state: "West Bengal", base: { genOS: [180000,270000], obcOS: [220000,330000], scOS: [320000,480000], stOS: [380000,560000] } },
+    { name: "Madhav Institute of Technology, Gwalior", type: "GFTI", state: "Madhya Pradesh", base: { genOS: [150000,230000], obcOS: [190000,290000], scOS: [290000,430000], stOS: [340000,510000] } },
+    { name: "School of Engineering, CUSAT", type: "GFTI", state: "Kerala", base: { genOS: [130000,200000], obcOS: [168000,255000], scOS: [260000,390000], stOS: [310000,470000] } },
+    { name: "Institute of Engineering, Jiwaji University", type: "StateEngg", state: "Madhya Pradesh", base: { genOS: [280000,420000], obcOS: [350000,520000], scOS: [500000,750000], stOS: [600000,890000] } },
+    { name: "Bihar Engineering College", type: "StateEngg", state: "Bihar", base: { genOS: [320000,480000], obcOS: [400000,600000], scOS: [580000,860000], stOS: [690000,1020000] } },
+    { name: "Government Engineering College, Gandhinagar", type: "StateEngg", state: "Gujarat", base: { genOS: [350000,530000], obcOS: [440000,660000], scOS: [630000,940000], stOS: [750000,1120000] } },
+    { name: "University College of Engineering, Rajasthan", type: "StateEngg", state: "Rajasthan", base: { genOS: [380000,570000], obcOS: [480000,720000], scOS: [690000,1030000], stOS: [820000,1220000] } },
+    { name: "Chhatrapati Shivaji Institute of Technology", type: "StateEngg", state: "Chhattisgarh", base: { genOS: [420000,620000], obcOS: [530000,790000], scOS: [760000,1130000], stOS: [900000,1350000] } }
+  ];
+
+  const branchesList = ["Computer Science", "Electronics & Comm.", "Mechanical", "Civil", "Electrical", "Chemical", "Metallurgy", "Biotechnology", "Production", "Information Technology"];
+  
   let fullDataset = [];
 
-  collegeTemplates.forEach(t => {
-    let branchCount = t.type === "IIIT" ? 3 : (t.type === "NIT" ? 4 : 2);
-    for(let i=0; i<branchCount && i<branchesList.length; i++) {
-      let branch = branchesList[i];
-      let factor = 1.0;
-      if(branch === "Computer Science") factor = 0.85;
-      else if(branch === "Electronics & Comm.") factor = 0.96;
-      else if(branch === "Mechanical") factor = 1.15;
-      else if(branch === "Civil") factor = 1.35;
-      else if(branch === "Electrical") factor = 1.2;
-      else factor = 1.45;
-      
-      const adjust = (arr) => [Math.round(arr[0]*factor), Math.round(arr[1]*factor)];
-      const genOS = adjust(t.base.genOS);
-      const obcOS = adjust(t.base.obcOS);
-      const scOS = adjust(t.base.scOS);
-      const stOS = adjust(t.base.stOS);
-      // home state cutoff ~ 10-20% lower
-      const genHS = [Math.round(genOS[0]*0.88), Math.round(genOS[1]*0.88)];
-      const obcHS = [Math.round(obcOS[0]*0.85), Math.round(obcOS[1]*0.85)];
-      const scHS = [Math.round(scOS[0]*0.84), Math.round(scOS[1]*0.84)];
-      const stHS = [Math.round(stOS[0]*0.83), Math.round(stOS[1]*0.83)];
-      
-      fullDataset.push({
-        name: t.name, type: t.type, state: t.state, branch: branch,
-        cutoffs: {
-          General: { hs: genHS, os: genOS },
-          OBC: { hs: obcHS, os: obcOS },
-          SC: { hs: scHS, os: scOS },
-          ST: { hs: stHS, os: stOS }
-        }
-      });
-    }
-  });
-  // ensure over 120+ rows
-  console.log("Dataset size:", fullDataset.length); // ~160
+  function expandColleges(templateArray, branchLimit) {
+    templateArray.forEach(t => {
+      let branchCount = branchLimit || (t.type === "IIIT" ? 3 : (t.type === "NIT" ? 4 : 3));
+      for(let i=0; i<branchCount && i<branchesList.length; i++) {
+        let branch = branchesList[i];
+        let factor = 1.0;
+        if(branch === "Computer Science") factor = 0.85;
+        else if(branch === "Information Technology") factor = 0.90;
+        else if(branch === "Electronics & Comm.") factor = 0.96;
+        else if(branch === "Mechanical") factor = 1.15;
+        else if(branch === "Civil") factor = 1.35;
+        else if(branch === "Electrical") factor = 1.25;
+        else if(branch === "Chemical") factor = 1.40;
+        else factor = 1.55;
+        
+        const adjust = (arr) => [Math.round(arr[0]*factor), Math.round(arr[1]*factor)];
+        const genOS = adjust(t.base.genOS);
+        const obcOS = adjust(t.base.obcOS);
+        const scOS = adjust(t.base.scOS);
+        const stOS = adjust(t.base.stOS);
+        // home state approx 12-18% lower
+        const genHS = [Math.round(genOS[0]*0.86), Math.round(genOS[1]*0.86)];
+        const obcHS = [Math.round(obcOS[0]*0.84), Math.round(obcOS[1]*0.84)];
+        const scHS = [Math.round(scOS[0]*0.82), Math.round(scOS[1]*0.82)];
+        const stHS = [Math.round(stOS[0]*0.81), Math.round(stOS[1]*0.81)];
+        
+        fullDataset.push({
+          name: t.name, type: t.type, state: t.state, branch: branch,
+          cutoffs: {
+            General: { hs: genHS, os: genOS },
+            OBC: { hs: obcHS, os: obcOS },
+            SC: { hs: scHS, os: scOS },
+            ST: { hs: stHS, os: stOS }
+          }
+        });
+      }
+    });
+  }
 
-  // rank conversion helpers
-  const TOTAL_CAND = 1500000;
-  const MARKS_BREAK = [300,280,250,220,190,160,130,100,60,20,0];
-  const PERC_BREAK = [100,99.95,99.7,99,98,96,93,85,70,40,0];
-  function interp(x,x1,x2,y1,y2) { if(x1===x2) return y1; return y1 + (x-x1)*(y2-y1)/(x2-x1); }
-  function marksToPercentile(m) { if(m>=300) return 100; if(m<=0) return 0; let mm=Math.min(300,Math.max(0,m)); for(let i=0;i<MARKS_BREAK.length-1;i++) if(mm<=MARKS_BREAK[i] && mm>=MARKS_BREAK[i+1]) return interp(mm, MARKS_BREAK[i], MARKS_BREAK[i+1], PERC_BREAK[i], PERC_BREAK[i+1]); return 0; }
-  function percentileToRank(p) { if(p>=100) return 1; if(p<=0) return TOTAL_CAND; return Math.max(1, Math.round(TOTAL_CAND*(100-p)/100)); }
-  function marksToRank(m) { return percentileToRank(marksToPercentile(m)); }
+  expandColleges(highTier, 4);
+  expandColleges(lowTier, 3);
+  // Final check: total entries well above 200
+  console.log("Dataset size:", fullDataset.length); 
 
+  // DOM elements
   let currentUserRank = null;
   let lastEligibleColleges = [];
-
-  // favorites + compare
   let favorites = JSON.parse(localStorage.getItem("jee_favs") || "[]");
   let selectedCompareSet = new Set();
 
-  // DOM elements
+  const predictBtn = document.getElementById("predictBtn");
   const userValueInput = document.getElementById("userValue");
   const categorySelect = document.getElementById("categorySelect");
   const homeStateInput = document.getElementById("homeState");
-  const predictBtn = document.getElementById("predictBtn");
   const collegeListDiv = document.getElementById("collegeList");
   const eligibleListContainer = document.getElementById("eligibleListContainer");
   const favoritesListDiv = document.getElementById("favoritesList");
@@ -343,8 +354,8 @@
   const exportCSV = document.getElementById("exportCSV");
   const selectedCountSpan = document.getElementById("selectedCount");
   const clearFavsBtn = document.getElementById("clearFavs");
+  const rankPreview = document.getElementById("rankPreview");
 
-  // populate filter dropdowns
   function populateFilters() {
     const states = [...new Set(fullDataset.map(c=>c.state))].sort();
     const branches = [...new Set(fullDataset.map(c=>c.branch))].sort();
@@ -353,74 +364,8 @@
   }
   populateFilters();
 
-  // get cutoff based on category + home state
   function getCutoffRange(coll, category, homeStateRaw) {
     const cat = category;
     const isHome = (homeStateRaw && coll.state.toLowerCase().includes(homeStateRaw.toLowerCase()));
     const quota = isHome ? "hs" : "os";
-    const cutoffArr = coll.cutoffs[cat]?.[quota] || coll.cutoffs.General[quota];
-    if(!cutoffArr) return null;
-    return { open: cutoffArr[0], close: cutoffArr[1], homeAdv: isHome };
-  }
-
-  function getChanceCategory(userRank, closingRank) {
-    if(!closingRank) return "Ambitious";
-    let ratio = userRank / closingRank;
-    if(ratio <= 0.65) return "Very Safe";
-    if(ratio <= 0.85) return "Safe";
-    if(ratio <= 1.0) return "Target";
-    if(ratio <= 1.2) return "Dream";
-    return "Ambitious";
-  }
-
-  function filterAndPredict(userRank, category, homeState, extraFilters = {}) {
-    if(userRank === null) return [];
-    let results = fullDataset.filter(col => {
-      const cutoffObj = getCutoffRange(col, category, homeState);
-      if(!cutoffObj) return false;
-      return userRank <= cutoffObj.close;
-    }).map(col => {
-      const cutoffObj = getCutoffRange(col, category, homeState);
-      const chance = getChanceCategory(userRank, cutoffObj.close);
-      return { ...col, cutoffOpen: cutoffObj.open, cutoffClose: cutoffObj.close, chance, homeAdvantage: cutoffObj.homeAdv };
-    }).sort((a,b)=>a.cutoffClose - b.cutoffClose);
-    
-    // apply extra filters
-    if(extraFilters.type && extraFilters.type !== "all") results = results.filter(c=>c.type === extraFilters.type);
-    if(extraFilters.state && extraFilters.state !== "all") results = results.filter(c=>c.state === extraFilters.state);
-    if(extraFilters.branch && extraFilters.branch !== "all") results = results.filter(c=>c.branch === extraFilters.branch);
-    if(extraFilters.search) {
-      let s = extraFilters.search.toLowerCase();
-      results = results.filter(c=> c.name.toLowerCase().includes(s) || c.branch.toLowerCase().includes(s));
-    }
-    return results;
-  }
-
-  function getCurrentFilters() {
-    return {
-      type: typeFilter.value,
-      state: stateFilter.value,
-      branch: branchFilterMulti.value,
-      search: searchBox.value
-    };
-  }
-
-  function updateResults() {
-    if(currentUserRank === null) {
-      collegeListDiv.innerHTML = `<div style="text-align:center; padding:2rem;">🔍 Enter marks/rank and click Predict</div>`;
-      eligibleListContainer.innerHTML = `<div style="text-align:center;">No data yet</div>`;
-      return;
-    }
-    const category = categorySelect.value;
-    const homeState = homeStateInput.value;
-    const filters = getCurrentFilters();
-    const eligible = filterAndPredict(currentUserRank, category, homeState, filters);
-    lastEligibleColleges = eligible;
-    renderCollegeCards(eligible, "collegeList", true, true);
-    renderCollegeCards(eligible, "eligibleListContainer", false, true);
-    updateSelectedCount();
-  }
-
-  function renderCollegeCards(colleges, containerId, withCompare, withFav) {
-    const container = document.getElementById(containerId);
-    if(!colleges.length) { container.innerHTML = `<div style="text-align:center; padding:2rem;">✨ No eligible colleges with current fi
+    const cutoffArr = coll.cutoffs[cat]?.[q
