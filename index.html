@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>JEE Main Predictor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f5fa 0%, #e0eaf3 100%);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .card {
+      max-width: 460px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+    }
+
+    .card-inner {
+      padding: 2rem 1.8rem 2.2rem;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #1e2f3f, #0f2b3b);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.8rem;
+    }
+
+    .description {
+      color: #4a6f8f;
+      font-size: 0.85rem;
+      margin-bottom: 1.6rem;
+      border-left: 3px solid #3b82f6;
+      padding-left: 0.75rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1f4b6e;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f9fbfd;
+      border: 1px solid #d4e2f0;
+      border-radius: 2rem;
+      transition: all 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: #ffffff;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #0a2a3b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    input::placeholder {
+      color: #a8c0d6;
+      font-weight: 400;
+      font-family: system-ui;
+    }
+
+    button {
+      background: #1e3a4d;
+      border: none;
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #0f2e3f;
+      transform: scale(0.98);
+    }
+
+    .result-card {
+      margin-top: 1.8rem;
+      background: #fefefe;
+      border-radius: 1.3rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid #e2edf7;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid #ecf3f9;
+      flex-wrap: wrap;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .result-label {
+      font-weight: 600;
+      color: #2c5a7a;
+      font-size: 0.85rem;
+    }
+
+    .result-value {
+      font-weight: 700;
+      color: #0e2c3e;
+      font-size: 1rem;
+      background: #ecf3f9;
+      padding: 0.2rem 0.7rem;
+      border-radius: 40px;
+    }
+
+    .college-suggestion {
+      margin-top: 1rem;
+      background: #eef4fa;
+      border-radius: 1rem;
+      padding: 0.8rem 1rem;
+      text-align: center;
+    }
+
+    .college-title {
+      font-weight: 800;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #1c6f9c;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.3rem;
+    }
+
+    .college-text {
+      font-weight: 500;
+      color: #0b3b4f;
+      font-size: 0.9rem;
+    }
+
+    .footnote {
+      font-size: 0.65rem;
+      color: #7b99b5;
+      text-align: center;
+      margin-top: 1.2rem;
+      border-top: 1px solid #e2edf7;
+      padding-top: 1rem;
+    }
+
+    .error-msg {
+      background: #ffe8e7;
+      color: #bc3f2e;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .card-inner {
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      .result-value {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+    <h1>JEE Main Predictor</h1>
+    <div class="description">
+      Enter marks (0–300) or rank (>300) → instant estimation
+    </div>
+
+    <div class="input-group">
+      <label>📊 Marks / Rank</label>
+      <div class="input-wrapper">
+        <input type="number" id="jeeInput" placeholder="e.g., 245  or  15200" autocomplete="off">
+      </div>
+    </div>
+
+    <button id="predictButton">✨ Get Result</button>
+
+    <div id="resultContainer"></div>
+    <div class="footnote">
+      ⚡ ≤300 = marks | >300 = rank • lightweight approximation based on JEE trends (approx 15L candidates)
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- UPDATED CONFIGURATION ----------
+  const TOTAL_CANDIDATES = 1500000;   // 15 lakh candidates
+
+  // Refined marks ↔ percentile mapping
+  const MARKS_BREAK = [300, 280, 250, 200, 170, 140, 100, 50, 0];
+  const PERC_BREAK  = [100, 99.9, 99.5, 99, 98, 96, 92, 85, 0];
+
+  function linearInterp(x, x1, x2, y1, y2) {
+    if (x1 === x2) return y1;
+    return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+  }
+
+  function marksToPercentile(marks) {
+    if (marks >= 300) return 100;
+    if (marks <= 0) return 0;
+    let m = Math.min(300, Math.max(0, marks));
+    for (let i = 0; i < MARKS_BREAK.length - 1; i++) {
+      let highMark = MARKS_BREAK[i];
+      let lowMark = MARKS_BREAK[i+1];
+      if (m <= highMark && m >= lowMark) {
+        return linearInterp(m, highMark, lowMark, PERC_BREAK[i], PERC_BREAK[i+1]);
+      }
+    }
+    return 0;
+  }
+
+  function percentileToMarks(percentile) {
+    if (percentile >= 100) return 300;
+    if (percentile <= 0) return 0;
+    let p = Math.min(100, Math.max(0, percentile));
+    for (let i = 0; i < PERC_BREAK.length - 1; i++) {
+      let highP = PERC_BREAK[i];
+      let lowP = PERC_BREAK[i+1];
+      if (p <= highP && p >= lowP) {
+        return linearInterp(p, highP, lowP, MARKS_BREAK[i], MARKS_BREAK[i+1]);
+      }
+    }
+    return 0;
+  }
+
+  function percentileToRank(percentile) {
+    if (percentile >= 100) return 1;
+    if (percentile <= 0) return TOTAL_CANDIDATES;
+    return Math.max(1, Math.round(TOTAL_CANDIDATES * (100 - percentile) / 100));
+  }
+
+  function rankToPercentile(rank) {
+    if (rank <= 1) return 100;
+    if (rank >= TOTAL_CANDIDATES) return 0;
+    return 100 - (rank / TOTAL_CANDIDATES) * 100;
+  }
+
+  // ---------- COLLEGE SUGGESTION (user's exact thresholds) ----------
+  function suggestCollege(rank) {
+    if (rank <= 20000)
+      return "🎓 Top NITs / IIITs (good branches possible)";
+
+    if (rank <= 50000)
+      return "📚 Mid NITs / IIITs (branch may vary)";
+
+    if (rank <= 100000)
+      return "🏛️ Lower NITs / GFTIs (limited branches, check carefully)";
+
+    if (rank <= 300000)
+      return "⚠️ Some NITs possible in later rounds (low branches, chances depend on category & cutoff)";
+
+    return "📊 Mostly state colleges / private universities (NIT chances very low)";
+  }
+
+  function formatRank(r) {
+    return r.toLocaleString('en-IN');
+  }
+
+  // ---------- MAIN PREDICTION ENGINE ----------
+  function computePrediction(rawNumber) {
+    // detection: ≤300 → marks, >300 → rank
+    if (rawNumber <= 300) {
+      let marks = Math.min(300, Math.max(0, rawNumber));
+      let percentile = marksToPercentile(marks);
+      let estimatedRank = percentileToRank(percentile);
+      let college = suggestCollege(estimatedRank);
+      return {
+        mode: "marks",
+        marks: marks,
+        percentile: percentile,
+        rank: estimatedRank,
+        college: college
+      };
+    } else {
+      let rankInput = Math.floor(Math.max(1, rawNumber));
+      let percentile = rankToPercentile(rankInput);
+      let estimatedMarks = percentileToMarks(percentile);
+      let college = suggestCollege(rankInput);
+      return {
+        mode: "rank",
+        rank: rankInput,
+        percentile: percentile,
+        marks: estimatedMarks,
+        college: college
+      };
+    }
+  }
+
+  function renderResult(result) {
+    const container = document.getElementById("resultContainer");
+    let html = `<div class="result-card">`;
+
+    if (result.mode === "marks") {
+      html += `
+        <div class="result-row">
+          <span class="result-label">📝 Marks</span>
+          <span class="result-value">${result.marks.toFixed(2)} / 300</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📊 Percentile</span>
+          <span class="result-value">${result.percentile.toFixed(2)}%</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">🎯 Approx. Rank</span>
+          <span class="result-value">${formatRank(result.rank)}</span>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="result-row">
+          <span class="result-label">🔢 Rank (AIR)</span>
+          <span class="result-value">${formatRank(result.rank)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📈 Percentile</span>
+          <span class="result-value">${result.percentile.toFixed(2)}%</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📖 Approx. Marks</span>
+          <span class="result-value">${result.marks.toFixed(2)} / 300</span>
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="college-suggestion">
+        <div class="college-title">🏛️ COLLEGE OUTLOOK</div>
+        <div class="college-text">${result.college}</div>
+      </div>
+    `;
+    html += `<div style="font-size:0.65rem; text-align:center; margin-top:0.7rem; color:#6287a5;">* estimates based on approx 15L candidates</div>`;
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
+  function showError(message) {
+    const container = document.getElementById("resultContainer");
+    container.innerHTML = `<div class="error-msg">⚠️ ${message}</div>`;
+  }
+
+  // ---------- EVENT HANDLERS ----------
+  const inputField = document.getElementById("jeeInput");
+  const predictBtn = document.getElementById("predictButton");
+
+  function handlePrediction() {
+    let rawValue = inputField.value.trim();
+    if (rawValue === "") {
+      showError("Please enter marks (0–300) or rank (>300).");
+      return;
+    }
+    const numeric = parseFloat(rawValue);
+    if (isNaN(numeric)) {
+      showError("Enter a valid number (marks or rank).");
+      return;
+    }
+    if (numeric < 0) {
+      showError("Value cannot be negative.");
+      return;
+    }
+    const result = computePrediction(numeric);
+    renderResult(result);
+  }
+
+  predictBtn.addEventListener("click", handlePrediction);
+  inputField.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handlePrediction();
+    }
+  });
+
+  // initial placeholder
+  window.addEventListener("load", () => {
+    document.getElementById("resultContainer").innerHTML = `
+      <div class="result-card" style="opacity:0.8; text-align:center; padding:1rem; color:#5f8aac;">
+        ✨ Enter marks ≤300 or rank >300<br>→ tap "Get Result"
+      </div>
+    `;
+  });
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>JEE Main Predictor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f5fa 0%, #e0eaf3 100%);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .card {
+      max-width: 460px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+    }
+
+    .card-inner {
+      padding: 2rem 1.8rem 2.2rem;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #1e2f3f, #0f2b3b);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.8rem;
+    }
+
+    .description {
+      color: #4a6f8f;
+      font-size: 0.85rem;
+      margin-bottom: 1.6rem;
+      border-left: 3px solid #3b82f6;
+      padding-left: 0.75rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1f4b6e;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f9fbfd;
+      border: 1px solid #d4e2f0;
+      border-radius: 2rem;
+      transition: all 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: #ffffff;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #0a2a3b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    input::placeholder {
+      color: #a8c0d6;
+      font-weight: 400;
+      font-family: system-ui;
+    }
+
+    button {
+      background: #1e3a4d;
+      border: none;
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #0f2e3f;
+      transform: scale(0.98);
+    }
+
+    .result-card {
+      margin-top: 1.8rem;
+      background: #fefefe;
+      border-radius: 1.3rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid #e2edf7;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid #ecf3f9;
+      flex-wrap: wrap;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .result-label {
+      font-weight: 600;
+      color: #2c5a7a;
+      font-size: 0.85rem;
+    }
+
+    .result-value {
+      font-weight: 700;
+      color: #0e2c3e;
+      font-size: 1rem;
+      background: #ecf3f9;
+      padding: 0.2rem 0.7rem;
+      border-radius: 40px;
+    }
+
+    .college-suggestion {
+      margin-top: 1rem;
+      background: #eef4fa;
+      border-radius: 1rem;
+      padding: 0.8rem 1rem;
+      text-align: center;
+    }
+
+    .college-title {
+      font-weight: 800;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #1c6f9c;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.3rem;
+    }
+
+    .college-text {
+      font-weight: 500;
+      color: #0b3b4f;
+      font-size: 0.9rem;
+    }
+
+    .footnote {
+      font-size: 0.65rem;
+      color: #7b99b5;
+      text-align: center;
+      margin-top: 1.2rem;
+      border-top: 1px solid #e2edf7;
+      padding-top: 1rem;
+    }
+
+    .error-msg {
+      background: #ffe8e7;
+      color: #bc3f2e;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .card-inner {
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      .result-value {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-inner">
+    <h1>JEE Main Predictor</h1>
+    <div class="description">
+      Enter marks (0–300) or rank (>300) → instant estimation
+    </div>
+
+    <div class="input-group">
+      <label>📊 Marks / Rank</label>
+      <div class="input-wrapper">
+        <input type="number" id="jeeInput" placeholder="e.g., 245  or  15200" autocomplete="off">
+      </div>
+    </div>
+
+    <button id="predictButton">✨ Get Result</button>
+
+    <div id="resultContainer"></div>
+    <div class="footnote">
+      ⚡ ≤300 = marks | >300 = rank • lightweight approximation based on JEE trends (approx 15L candidates)
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- UPDATED CONFIGURATION ----------
+  const TOTAL_CANDIDATES = 1500000;   // 15 lakh candidates
+
+  // Refined marks ↔ percentile mapping
+  const MARKS_BREAK = [300, 280, 250, 200, 170, 140, 100, 50, 0];
+  const PERC_BREAK  = [100, 99.9, 99.5, 99, 98, 96, 92, 85, 0];
+
+  function linearInterp(x, x1, x2, y1, y2) {
+    if (x1 === x2) return y1;
+    return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+  }
+
+  function marksToPercentile(marks) {
+    if (marks >= 300) return 100;
+    if (marks <= 0) return 0;
+    let m = Math.min(300, Math.max(0, marks));
+    for (let i = 0; i < MARKS_BREAK.length - 1; i++) {
+      let highMark = MARKS_BREAK[i];
+      let lowMark = MARKS_BREAK[i+1];
+      if (m <= highMark && m >= lowMark) {
+        return linearInterp(m, highMark, lowMark, PERC_BREAK[i], PERC_BREAK[i+1]);
+      }
+    }
+    return 0;
+  }
+
+  function percentileToMarks(percentile) {
+    if (percentile >= 100) return 300;
+    if (percentile <= 0) return 0;
+    let p = Math.min(100, Math.max(0, percentile));
+    for (let i = 0; i < PERC_BREAK.length - 1; i++) {
+      let highP = PERC_BREAK[i];
+      let lowP = PERC_BREAK[i+1];
+      if (p <= highP && p >= lowP) {
+        return linearInterp(p, highP, lowP, MARKS_BREAK[i], MARKS_BREAK[i+1]);
+      }
+    }
+    return 0;
+  }
+
+  function percentileToRank(percentile) {
+    if (percentile >= 100) return 1;
+    if (percentile <= 0) return TOTAL_CANDIDATES;
+    return Math.max(1, Math.round(TOTAL_CANDIDATES * (100 - percentile) / 100));
+  }
+
+  function rankToPercentile(rank) {
+    if (rank <= 1) return 100;
+    if (rank >= TOTAL_CANDIDATES) return 0;
+    return 100 - (rank / TOTAL_CANDIDATES) * 100;
+  }
+
+  // ---------- COLLEGE SUGGESTION (user's exact thresholds) ----------
+  function suggestCollege(rank) {
+    if (rank <= 20000)
+      return "🎓 Top NITs / IIITs (good branches possible)";
+
+    if (rank <= 50000)
+      return "📚 Mid NITs / IIITs (branch may vary)";
+
+    if (rank <= 100000)
+      return "🏛️ Lower NITs / GFTIs (limited branches, check carefully)";
+
+    if (rank <= 300000)
+      return "⚠️ Some NITs possible in later rounds (low branches, chances depend on category & cutoff)";
+
+    return "📊 Mostly state colleges / private universities (NIT chances very low)";
+  }
+
+  function formatRank(r) {
+    return r.toLocaleString('en-IN');
+  }
+
+  // ---------- MAIN PREDICTION ENGINE ----------
+  function computePrediction(rawNumber) {
+    // detection: ≤300 → marks, >300 → rank
+    if (rawNumber <= 300) {
+      let marks = Math.min(300, Math.max(0, rawNumber));
+      let percentile = marksToPercentile(marks);
+      let estimatedRank = percentileToRank(percentile);
+      let college = suggestCollege(estimatedRank);
+      return {
+        mode: "marks",
+        marks: marks,
+        percentile: percentile,
+        rank: estimatedRank,
+        college: college
+      };
+    } else {
+      let rankInput = Math.floor(Math.max(1, rawNumber));
+      let percentile = rankToPercentile(rankInput);
+      let estimatedMarks = percentileToMarks(percentile);
+      let college = suggestCollege(rankInput);
+      return {
+        mode: "rank",
+        rank: rankInput,
+        percentile: percentile,
+        marks: estimatedMarks,
+        college: college
+      };
+    }
+  }
+
+  function renderResult(result) {
+    const container = document.getElementById("resultContainer");
+    let html = `<div class="result-card">`;
+
+    if (result.mode === "marks") {
+      html += `
+        <div class="result-row">
+          <span class="result-label">📝 Marks</span>
+          <span class="result-value">${result.marks.toFixed(2)} / 300</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📊 Percentile</span>
+          <span class="result-value">${result.percentile.toFixed(2)}%</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">🎯 Approx. Rank</span>
+          <span class="result-value">${formatRank(result.rank)}</span>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="result-row">
+          <span class="result-label">🔢 Rank (AIR)</span>
+          <span class="result-value">${formatRank(result.rank)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📈 Percentile</span>
+          <span class="result-value">${result.percentile.toFixed(2)}%</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📖 Approx. Marks</span>
+          <span class="result-value">${result.marks.toFixed(2)} / 300</span>
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="college-suggestion">
+        <div class="college-title">🏛️ COLLEGE OUTLOOK</div>
+        <div class="college-text">${result.college}</div>
+      </div>
+    `;
+    html += `<div style="font-size:0.65rem; text-align:center; margin-top:0.7rem; color:#6287a5;">* estimates based on approx 15L candidates</div>`;
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
+  function showError(message) {
+    const container = document.getElementById("resultContainer");
+    container.innerHTML = `<div class="error-msg">⚠️ ${message}</div>`;
+  }
+
+  // ---------- EVENT HANDLERS ----------
+  const inputField = document.getElementById("jeeInput");
+  const predictBtn = document.getElementById("predictButton");
+
+  function handlePrediction() {
+    let rawValue = inputField.value.trim();
+    if (rawValue === "") {
+      showError("Please enter marks (0–300) or rank (>300).");
+      return;
+    }
+    const numeric = parseFloat(rawValue);
+    if (isNaN(numeric)) {
+      showError("Enter a valid number (marks or rank).");
+      return;
+    }
+    if (numeric < 0) {
+      showError("Value cannot be negative.");
+      return;
+    }
+    const result = computePrediction(numeric);
+    renderResult(result);
+  }
+
+  predictBtn.addEventListener("click", handlePrediction);
+  inputField.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handlePrediction();
+    }
+  });
+
+  // initial placeholder
+  window.addEventListener("load", () => {
+    document.getElementById("resultContainer").innerHTML = `
+      <div class="result-card" style="opacity:0.8; text-align:center; padding:1rem; color:#5f8aac;">
+        ✨ Enter marks ≤300 or rank >300<br>→ tap "Get Result"
+      </div>
+    `;
+  });
+</script>
+</body>
+</html>
