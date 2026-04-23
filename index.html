@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE Predictor Pro | Advanced Analytics</title>
+    <title>JEE Predictor Pro | Precision Engine</title>
     <style>
         :root {
-            --glass: rgba(255, 255, 255, 0.95);
-            --primary: #0f172a;
-            --accent: #3b82f6;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --glass: rgba(255, 255, 255, 0.98);
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --safe: #059669;
+            --target: #d97706;
+            --dream: #dc2626;
         }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(45deg, #0f172a, #1e293b);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,235 +27,166 @@
 
         .container {
             background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 35px;
+            border-radius: 28px;
+            width: 95%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 1.5rem; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
-        .header p { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #475569; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { font-size: 1.6rem; margin: 0; font-weight: 800; color: #0f172a; }
+        
+        .form-group { margin-bottom: 18px; }
+        label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; display: block; }
 
         input, select {
             width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
             border: 2px solid #e2e8f0;
             font-size: 1rem;
             transition: all 0.2s;
             box-sizing: border-box;
         }
 
-        input:focus { border-color: var(--accent); outline: none; ring: 3px rgba(59, 130, 246, 0.2); }
+        input:focus { border-color: var(--accent); outline: none; }
 
         button {
             width: 100%;
-            padding: 14px;
-            background: var(--primary);
+            padding: 15px;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            margin-top: 10px;
         }
 
-        button:hover { background: #1e293b; transform: translateY(-2px); }
-        button:active { transform: translateY(0); }
-
-        .results-area { margin-top: 30px; display: none; }
+        .results-area { margin-top: 25px; display: none; border-top: 2px solid #f1f5f9; padding-top: 20px; }
         
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #f8fafc; padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
 
-        .stat-card {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
+        .college-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #fff;
+            margin-bottom: 8px;
+            border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
 
-        .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
-        .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
-
-        .college-list { list-style: none; padding: 0; }
-        .college-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 99px;
-            margin-left: auto;
-            font-weight: 700;
-        }
-        .badge-dream { background: #fee2e2; color: #ef4444; }
-        .badge-reach { background: #fef3c7; color: #d97706; }
-        .badge-safe { background: #dcfce7; color: #16a34a; }
+        .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 800; color: white; }
+        .badge-safe { background: var(--safe); }
+        .badge-target { background: var(--target); }
+        .badge-dream { background: var(--dream); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>Predictor Pro v2.0</h1>
-        <p>Advanced Seat Allocation Engine</p>
+        <h1>Predictor Pro <span style="color: var(--accent)">v2.1</span></h1>
     </div>
 
     <div class="form-group">
         <label>Input Type</label>
-        <select id="inputType" onchange="togglePlaceholder()">
-            <option value="marks">NTA Score (Marks 0-300)</option>
+        <select id="inputType">
+            <option value="marks">NTA Score (0-300)</option>
             <option value="rank">CRL Rank</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label id="inputLabel">Enter Marks</label>
-        <input type="number" id="userInput" placeholder="e.g. 185">
+        <label>Value</label>
+        <input type="number" id="userInput" placeholder="Enter score/rank">
     </div>
 
     <div class="form-group">
         <label>Category</label>
         <select id="userCat">
-            <option value="GEN">General (Open)</option>
-            <option value="OBC">OBC-NCL</option>
-            <option value="EWS">EWS</option>
-            <option value="SC">SC</option>
-            <option value="ST">ST</option>
+            <option value="1">General</option>
+            <option value="2.8">OBC-NCL</option>
+            <option value="6.5">SC/ST</option>
         </select>
     </div>
 
-    <button onclick="runAnalysis()">Analyze Chances</button>
+    <button onclick="runAnalysis()">Run Prediction</button>
 
     <div class="results-area" id="results">
         <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-label">Percentile</div>
-                <div class="stat-value" id="resPercentile">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Est. CRL Rank</div>
-                <div class="stat-value" id="resRank">-</div>
-            </div>
+            <div class="stat-card"><div>Percentile</div><div class="stat-val" id="resPercentile">-</div></div>
+            <div class="stat-card"><div>Est. Rank</div><div class="stat-val" id="resRank">-</div></div>
         </div>
-
-        <label>Institutional Probability</label>
-        <div class="college-list" id="collegeList"></div>
+        <div id="collegeList"></div>
     </div>
 </div>
 
 <script>
-    function togglePlaceholder() {
-        const type = document.getElementById('inputType').value;
-        const label = document.getElementById('inputLabel');
-        const input = document.getElementById('userInput');
-        label.innerText = type === 'marks' ? 'Enter Marks' : 'Enter CRL Rank';
-        input.placeholder = type === 'marks' ? 'e.g. 185' : 'e.g. 25000';
-    }
-
-    function calculatePercentile(marks) {
-        // Non-linear mapping mimicking historical density
-        if (marks >= 280) return 99.9 + (marks - 280) * 0.005;
-        if (marks >= 200) return 99.0 + (marks - 200) * 0.011;
-        if (marks >= 150) return 97.0 + (marks - 150) * 0.04;
-        if (marks >= 100) return 90.0 + (marks - 100) * 0.14;
-        return (marks / 100) * 90;
+    function calculatePercentile(m) {
+        if (m >= 290) return 99.99;
+        if (m >= 250) return 99.7 + (m - 250) * 0.007;
+        if (m >= 200) return 98.5 + (m - 200) * 0.024;
+        if (m >= 150) return 95 + (m - 150) * 0.07;
+        if (m >= 100) return 85 + (m - 100) * 0.2;
+        if (m >= 50) return 60 + (m - 50) * 0.5;
+        return m * 1.2;
     }
 
     function runAnalysis() {
         const type = document.getElementById('inputType').value;
         const val = parseFloat(document.getElementById('userInput').value);
-        const cat = document.getElementById('userCat').value;
+        const catMultiplier = parseFloat(document.getElementById('userCat').value);
         
-        if (isNaN(val)) return alert("Please enter a valid value.");
-
         let crl, percentile;
+        const totalCandidates = 1500000;
 
         if (type === 'marks') {
             percentile = calculatePercentile(val);
-            crl = Math.round((100 - percentile) * 12000); // 1.2M candidates approx
+            crl = Math.round((100 - percentile) * totalCandidates / 100);
         } else {
             crl = val;
-            percentile = 100 - (crl / 12000);
+            percentile = 100 - (crl / totalCandidates) * 100;
         }
 
-        // Display Stats
         document.getElementById('resPercentile').innerText = percentile.toFixed(2) + "%";
         document.getElementById('resRank').innerText = crl.toLocaleString();
         document.getElementById('results').style.display = 'block';
 
-        // Allocation Logic
-        const list = document.getElementById('collegeList');
-        list.innerHTML = "";
-
-        // Simulated Database (Closing Ranks for General)
         const db = [
-            { name: "IIT Bombay/Delhi (CS/EE)", rank: 2000, type: "Advanced" },
-            { name: "NIT Trichy/Warangal (CS)", rank: 5000, type: "Mains" },
-            { name: "IIIT Allahabad (IT)", rank: 12000, type: "Mains" },
-            { name: "NIT Rourkela/Surathkal", rank: 25000, type: "Mains" },
-            { name: "Top GFTIs (PEC/BIT)", rank: 45000, type: "Mains" },
-            { name: "Newer IIITs / State Gov", rank: 80000, type: "Mains" }
+            { name: "IIT Top 5 (Adv Required)", rank: 3000 },
+            { name: "NIT Trichy/Surathkal CS", rank: 6000 },
+            { name: "IIIT Allahabad IT", rank: 11000 },
+            { name: "MNNIT / VNIT Core", rank: 28000 },
+            { name: "Newer IIITs / Mid NITs", rank: 45000 },
+            { name: "Top GFTIs / State Govt", rank: 75000 }
         ];
 
-        // Category Multiplier (Simplified logic for Category advantage)
-        let advantage = 1.0;
-        if (cat === "OBC") advantage = 2.5;
-        if (cat === "EWS") advantage = 2.2;
-        if (cat === "SC") advantage = 5.0;
-        if (cat === "ST") advantage = 8.0;
+        const list = document.getElementById('collegeList');
+        list.innerHTML = "<label>Estimated Availability</label>";
 
         db.forEach(col => {
-            const effectiveClosingRank = col.rank * advantage;
-            let status = "";
-            let badgeClass = "";
-
-            if (crl <= effectiveClosingRank * 0.7) {
-                status = "Safe";
-                badgeClass = "badge-safe";
-            } else if (crl <= effectiveClosingRank) {
-                status = "Reach";
-                badgeClass = "badge-reach";
-            } else if (crl <= effectiveClosingRank * 1.5) {
-                status = "Dream";
-                badgeClass = "badge-dream";
-            }
+            let effectiveClosingRank = col.rank * catMultiplier;
+            let ratio = crl / effectiveClosingRank;
+            
+            let status = "", badge = "";
+            if (ratio <= 0.6) { status = "Safe"; badge = "badge-safe"; }
+            else if (ratio <= 1.0) { status = "Target"; badge = "badge-target"; }
+            else if (ratio <= 1.3) { status = "Dream"; badge = "badge-dream"; }
 
             if (status) {
                 list.innerHTML += `
-                    <li class="college-item">
-                        <div style="font-size:0.9rem; font-weight:500;">${col.name}</div>
-                        <span class="badge ${badgeClass}">${status}</span>
-                    </li>
-                `;
+                    <div class="college-item">
+                        <span style="font-size:0.85rem; font-weight:600;">${col.name}</span>
+                        <span class="badge ${badge}">${status}</span>
+                    </div>`;
             }
         });
-
-        if (list.innerHTML === "") {
-            list.innerHTML = "<p style='font-size:0.8rem; color:#64748b;'>Consider State Private Universities or wait for CSAB rounds.</p>";
-        }
     }
 </script>
 </body>
