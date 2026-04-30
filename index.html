@@ -2,201 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE 2026 | Equilibrium Predictor v16.7</title>
+    <title>JEE 2026 Predictor | Gold Edition</title>
     <style>
-        :root { --primary: #4f46e5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --dark: #1e293b; --bg: #f8fafc; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--dark); padding: 15px; line-height: 1.5; }
-        .container { max-width: 650px; margin: auto; background: white; border-radius: 28px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-        
-        /* Stats Panel */
-        .stats-hero { background: var(--dark); color: white; border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px; display: none; animation: slideDown 0.4s ease-out; }
-        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        /* Input Styling */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 5px; margin-left: 5px; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 0.95rem; outline: none; transition: 0.3s; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); }
-        
-        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); }
-
-        /* Result Cards */
-        .result-item { border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 16px; margin-bottom: 12px; transition: 0.3s; }
-        .result-item:hover { border-color: var(--primary); background: #fcfcff; }
-        .badge { font-size: 0.65rem; padding: 4px 10px; border-radius: 8px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
-        .nit { background: #fee2e2; color: #ef4444; } .iiit { background: #e0f2fe; color: #0ea5e9; } .gfti { background: #fef3c7; color: #d97706; }
-        
-        .chance-high { color: var(--success); font-weight: 900; }
-        .chance-med { color: var(--warning); font-weight: 900; }
-        
-        .insight-box { font-size: 0.8rem; margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 10px; color: #475569; border-left: 4px solid var(--primary); }
+        :root { --p: #4f46e5; --s: #10b981; --w: #f59e0b; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); padding: 15px; margin: 0; }
+        .app-container { max-width: 500px; margin: 20px auto; background: white; border-radius: 30px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .hero { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
+        .input-box { margin-bottom: 15px; }
+        label { font-size: 0.8rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 15px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; background: var(--p); color: white; border: none; padding: 18px; border-radius: 18px; font-weight: 800; font-size: 1.1rem; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { background: #4338ca; transform: translateY(-2px); }
+        .res-card { border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 15px; margin-top: 15px; transition: 0.3s; position: relative; overflow: hidden; }
+        .res-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 5px; background: var(--p); }
+        .type-tag { font-size: 0.6rem; font-weight: 900; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
+        .nit { background: #fee2e2; color: #ef4444; } .iiit { background: #e0f2fe; color: #0ea5e9; }
+        .chance { font-weight: 900; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="text-align:center; letter-spacing:-1px;">Equilibrium Predictor <span style="color:var(--primary)">v16.7</span></h2>
-    
-    <div id="stats-hero" class="stats-hero">
-        <div id="rank-val" style="font-size: 2rem; font-weight: 900;"></div>
-        <div id="rank-desc" style="font-size: 0.85rem; opacity: 0.8;"></div>
+<div class="app-container">
+    <div class="hero">
+        <h2 style="margin:0">Predictor Gold v5.2</h2>
+        <p id="rank-text" style="margin:5px 0 0; font-size: 0.9rem; opacity: 0.8;">Enter details to see rank</p>
     </div>
 
-    <div class="grid">
-        <div>
-            <label>PERCENTILE</label>
-            <input type="number" id="perc" placeholder="e.g. 75.2" step="0.01">
-        </div>
-        <div>
+    <div class="input-box">
+        <label>JEE MAIN PERCENTILE</label>
+        <input type="number" id="p" placeholder="e.g. 85.5" step="0.01">
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="input-box">
             <label>CATEGORY</label>
-            <select id="cat">
-                <option value="GEN">General (CRL)</option>
+            <select id="c">
+                <option value="GEN">General</option>
                 <option value="OBC">OBC-NCL</option>
                 <option value="SC">SC</option>
                 <option value="ST">ST</option>
             </select>
         </div>
-        <div>
+        <div class="input-box">
             <label>HOME STATE</label>
-            <select id="state">
+            <select id="s">
                 <option value="Maharashtra">Maharashtra</option>
                 <option value="Delhi">Delhi</option>
-                <option value="Tamil Nadu">Tamil Nadu</option>
                 <option value="Other">Other State</option>
-            </select>
-        </div>
-        <div>
-            <label>BRANCH PREF</label>
-            <select id="group">
-                <option value="All">Any Branch</option>
-                <option value="Circuit">Circuit (CS/IT/EC)</option>
-                <option value="Core">Core (Mech/Civil)</option>
             </select>
         </div>
     </div>
 
-    <button class="btn-main" onclick="runEquilibrium()">Run Market Simulation</button>
+    <button class="btn" onclick="go()">Predict My Colleges</button>
 
-    <div id="results" style="margin-top: 25px;"></div>
-    
-    <button id="wa-btn" onclick="share()" style="display:none; background:#25D366; width:100%; border:none; padding:15px; border-radius:15px; color:white; font-weight:800; cursor:pointer; margin-top:10px;">Share Analysis on WhatsApp</button>
+    <div id="out"></div>
 </div>
 
 <script>
-// v16.7 Real-World Market Database
-const collegeDB = [
-    { name: "NIT Trichy", branch: "CSE", state: "Tamil Nadu", type: "NIT", grp: "Circuit", cutoffs: { GEN: {os: 1500, hs: 5000}, SC: {os: 400, hs: 1200} } },
-    { name: "NIT Nagpur (VNIT)", branch: "ECE", state: "Maharashtra", type: "NIT", grp: "Circuit", cutoffs: { GEN: {os: 9500, hs: 12000}, SC: {os: 1800, hs: 3500} } },
-    { name: "NIT Nagaland", branch: "Civil", state: "Nagaland", type: "NIT", grp: "Core", cutoffs: { GEN: {os: 55000, hs: 450000}, SC: {os: 8000, hs: 95000}, ST: {os: 3000, hs: 45000} } },
-    { name: "IIIT Guwahati", branch: "CSE", state: "Assam", type: "IIIT", grp: "Circuit", cutoffs: { GEN: {os: 22000, hs: 22000}, OBC: {os: 8000, hs: 8000} } },
-    { name: "GFTI Mizoram", branch: "ECE", state: "Mizoram", type: "GFTI", grp: "Circuit", cutoffs: { GEN: {os: 85000, hs: 750000}, SC: {os: 15000, hs: 180000} } },
-    { name: "RCOEM Nagpur", branch: "CSE", state: "Maharashtra", type: "GFTI", grp: "Circuit", cutoffs: { GEN: {os: 25000, hs: 45000}, SC: {os: 35000, hs: 280000} } },
-    { name: "NIT Agartala", branch: "Production", state: "Tripura", type: "NIT", grp: "Core", cutoffs: { GEN: {os: 52000, hs: 380000}, SC: {os: 9000, hs: 85000} } }
+const db = [
+    { n: "NIT Trichy", b: "CSE", s: "Tamil Nadu", t: "NIT", c: { GEN: {o: 1500, h: 5000}, SC: {o: 400, h: 1200} } },
+    { n: "NIT Nagpur (VNIT)", b: "Electronics", s: "Maharashtra", t: "NIT", c: { GEN: {o: 9000, h: 11000}, SC: {o: 1800, h: 3200} } },
+    { n: "NIT Nagaland", b: "Civil", s: "Nagaland", t: "NIT", c: { GEN: {o: 52000, h: 420000}, SC: {o: 8500, h: 92000} } },
+    { n: "IIIT Guwahati", b: "CSE", s: "Assam", t: "IIIT", c: { GEN: {o: 21000, h: 21000} } },
+    { n: "RCOEM Nagpur", b: "IT/CS", s: "Maharashtra", t: "GFTI", c: { GEN: {o: 35000, h: 45000}, SC: {o: 45000, h: 260000} } },
+    { n: "GFTI Mizoram", b: "ECE", s: "Mizoram", t: "GFTI", c: { GEN: {o: 82000, h: 720000}, SC: {o: 14000, h: 170000} } }
 ];
 
-function runEquilibrium() {
-    const perc = parseFloat(document.getElementById('perc').value);
-    const category = document.getElementById('cat').value;
-    const userState = document.getElementById('state').value;
-    const branchGrp = document.getElementById('group').value;
+function go() {
+    const p = parseFloat(document.getElementById('p').value);
+    const cat = document.getElementById('c').value;
+    const hState = document.getElementById('s').value;
+    
+    if(!p) return;
+    
+    // 16L candidates safety formula
+    let r = Math.floor((100 - p) * 16000);
+    document.getElementById('rank-text').innerText = `Estimated CRL: ~${r.toLocaleString()}`;
 
-    if (!perc || perc > 100) return alert("Please enter valid percentile");
-
-    // v16.7 OR Logic: 16L candidates + Equilibrium Jitter
-    let crl = Math.floor((100 - perc) * 16000);
-    crl += (Math.floor(Math.random() * 600) - 300); // Simulated market variance
-
-    // UI Update
-    const hero = document.getElementById('stats-hero');
-    hero.style.display = 'block';
-    document.getElementById('rank-val').innerText = `~${crl.toLocaleString()} CRL`;
-    document.getElementById('rank-desc').innerText = `Simulation based on 16 Lakh candidates (2026 Estimate)`;
-
-    // Market Filtering & Proximity Sorting
-    let filtered = collegeDB.filter(col => {
-        if (branchGrp !== "All" && col.grp !== branchGrp) return false;
-        
-        const quota = col.state === userState ? 'hs' : 'os';
-        const cutoff = col.cutoffs[category]?.[quota] || col.cutoffs['GEN']?.[quota];
-        
-        if (!cutoff) return false;
-        // v16.7 Coupling Check: 1.5x Multiplier for CSAB spillover
-        return crl <= (cutoff * 1.55);
+    let hits = db.filter(col => {
+        let q = col.s === hState ? 'h' : 'o';
+        let cut = col.c[cat]?.[q] || col.c['GEN']?.[q];
+        return cut && r <= (cut * 1.5);
     });
 
-    // Proximity Sorting (OR Kernel Logic: Lower ratio = Higher Probability)
-    filtered.sort((a,b) => {
-        const getC = (c) => c.cutoffs[category]?.[c.state === userState ? 'hs' : 'os'] || c.cutoffs['GEN']?.[c.state === userState ? 'hs' : 'os'];
-        return (crl / getC(a)) - (crl / getC(b));
+    // Proximity sorting
+    hits.sort((a,b) => {
+        let qA = a.s === hState ? 'h' : 'o';
+        let qB = b.s === hState ? 'h' : 'o';
+        return (r / (a.c[cat]?.[qA] || a.c['GEN']?.[qA])) - (r / (b.c[cat]?.[qB] || b.c['GEN']?.[qB]));
     });
 
-    render(filtered, crl, category, userState);
-}
-
-function render(data, crl, category, userState) {
-    const list = document.getElementById('results');
-    list.innerHTML = data.length ? "" : "<p style='text-align:center; padding:40px; color:#64748b;'>No high-probability matches found for this rank range. Consider GFTIs or State Counseling.</p>";
-
-    data.forEach(col => {
-        const quota = col.state === userState ? 'hs' : 'os';
-        const cutoff = col.cutoffs[category]?.[quota] || col.cutoffs['GEN']?.[quota];
-        const isSafe = crl <= cutoff;
-        
-        const status = isSafe ? "HIGH CHANCE" : "CSAB POTENTIAL";
-        const color = isSafe ? "var(--success)" : "var(--warning)";
-        
-        const insight = isSafe 
-            ? `Your rank is well within the ${quota.toUpperCase()} closing rank of ${cutoff.toLocaleString()}. Very safe choice.`
-            : `Closing rank was ${cutoff.toLocaleString()}. High probability in CSAB Special Rounds due to seat spillover.`;
-
-        list.innerHTML += `
-            <div class="result-item">
-                <span class="badge ${col.type.toLowerCase()}">${col.type}</span>
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <h3 style="margin:0; font-size:1.1rem; letter-spacing:-0.5px;">${col.name}</h3>
-                        <p style="margin:4px 0; font-size:0.85rem; color:#64748b; font-weight:600;">${col.branch} • ${quota.toUpperCase()}</p>
-                    </div>
-                    <div style="text-align:right">
-                        <div style="color:${color}; font-size:0.8rem; font-weight:900;">${status}</div>
-                        <div style="font-size:0.7rem; color:#94a3b8;">Closing: ${cutoff.toLocaleString()}</div>
-                    </div>
+    let html = "";
+    hits.forEach(h => {
+        let q = h.s === hState ? 'h' : 'o';
+        let cut = h.c[cat]?.[q] || h.c['GEN']?.[q];
+        let safe = r <= cut;
+        html += `
+            <div class="res-card">
+                <span class="type-tag ${h.t.toLowerCase()}">${h.t}</span>
+                <div style="display:flex; justify-content:space-between">
+                    <b>${h.n}</b>
+                    <span class="chance" style="color:${safe?'var(--s)':'var(--w)'}">${safe?'Safe':'CSAB'}</span>
                 </div>
-                <div class="insight-box">${insight}</div>
-            </div>
-        `;
+                <div style="font-size:0.8rem; color:#64748b; margin-top:5px;">
+                    ${h.b} | Cutoff: ${cut.toLocaleString()} (${q.toUpperCase()})
+                </div>
+            </div>`;
     });
-    document.getElementById('wa-btn').style.display = 'block';
-}
-
-function share() {
-    const rank = document.getElementById('rank-val').innerText;
-    const text = `JEE 2026 Analysis:\nCRL: ${rank}\nFound ${document.querySelectorAll('.result-item').length} Potential Colleges.\nCheck yours: `;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text + window.location.href)}`);
+    document.getElementById('out').innerHTML = html || "<p style='text-align:center'>No options found. Try CSAB rounds.</p>";
 }
 </script>
-
 </body>
 </html>
-class JoSAA_Equilibrium_v17:
-    def execute_fixed_point_search(self):
-        # 1. Initialize Cutoffs at 0
-        current_cutoffs = {cid: {cat: 0 for cat in cats} for cid in self.colleges}
-        stable = False
-        
-        while not stable:
-            # 2. Temporary Proposals
-            proposals = self._get_student_proposals(current_cutoffs)
-            
-            # 3. Market Clearing Step
-            new_cutoffs = self._calculate_market_clearing_prices(proposals)
-            
-            # 4. Convergence Check (The Fixed Point)
-            if new_cutoffs == current_cutoffs:
-                stable = True
-            current_cutoffs = new_cutoffs
-            
-        self.final_equilibrium = current_cutoffs
-        
