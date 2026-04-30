@@ -300,3 +300,78 @@
 </script>
 </body>
 </html>
+
+
+import numpy as np
+import pandas as pd
+
+class JoSAAKernel_v16_6:
+    def __init__(self, config, n_students=5000):
+        # 1. Coupled Seat Architecture
+        self.colleges = self._init_shared_pools(config)
+        self.students = self._generate_agents(n_students)
+        self.allocation = {} # {rank: {'college': cid, 'type': 'OPEN/RES'}}
+        
+    def _init_shared_pools(self, config):
+        for cid, data in config.items():
+            s = data['total_seats']
+            # Reality: GEN is actually 'OPEN' for everyone
+            data['pools'] = {
+                'OPEN': int(s * 0.50), # Competition for all
+                'OBC': int(s * 0.27), 'SC': int(s * 0.15), 'ST': int(s * 0.08)
+            }
+            data['utility_weight'] = (4 - data['tier']) ** 2 # Quadratic Tier Utility
+        return config
+
+    def _generate_agents(self, n):
+        cats = ['GEN', 'OBC', 'SC', 'ST']
+        probs = [0.50, 0.27, 0.15, 0.08]
+        agents = []
+        for r in range(1, n + 1):
+            agents.append({
+                'rank': r, 'cat': np.random.choice(cats, p=probs),
+                'prefs': sorted(self.colleges.keys(), key=lambda x: self.colleges[x]['tier'] + np.random.uniform(0, 1.2)),
+                'allocated': False, 'utility': 0
+            })
+        return agents
+
+    def execute_market_clearing(self, rounds=3):
+        """Strict Batch Rank-Pass Allocation"""
+        for r in range(1, rounds + 1):
+            # Filtering and Sorting ensure zero order-bias
+            active_queue = sorted([s for s in self.students if not s['allocated']], key=lambda x: x['rank'])
+            
+            for student in active_queue:
+                for choice in student['prefs']:
+                    col = self.colleges[choice]
+                    
+                    # LOGIC: First check OPEN (GEN) pool, then Category Reserved pool
+                    target_pool = 'OPEN' if col['pools']['OPEN'] > 0 else (student['cat'] if student['cat'] != 'GEN' else None)
+                    
+                    if target_pool and col['pools'][target_pool] > 0:
+                        # ALLOCATE
+                        col['pools'][target_pool] -= 1
+                        student['allocated'] = True
+                        student['utility'] = col['utility_weight']
+                        self.allocation[student['rank']] = {'college': choice, 'pool': target_pool}
+                        break
+            print(f"Round {r} Clear.")
+
+    def calculate_true_regret(self):
+        """Regret = Max Possible Utility - Realized Utility"""
+        # We assume Max Possible Utility is the utility of the Tier-1 college
+        MAX_U = 9 # (4 - 1)^2
+        regrets = [MAX_U - s['utility'] for s in self.students if s['allocated']]
+        return np.mean(regrets)
+
+# --- SYSTEM TEST ---
+market_config = {
+    "IIT_B": {"total_seats": 50, "tier": 1},
+    "NIT_T": {"total_seats": 100, "tier": 2},
+    "NIT_P": {"total_seats": 200, "tier": 3}
+}
+
+engine = JoSAAKernel_v16_6(market_config)
+engine.execute_market_clearing()
+print(f"v16.6 OR-Grade Mean Regret: {engine.calculate_true_regret():.2f}")
+
