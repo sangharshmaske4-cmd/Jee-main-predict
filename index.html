@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE Predictor Pro v4.0 | Precision Engine</title>
+    <title>JEE Predictor Pro v4.2 | SANGHARSH</title>
     <style>
         :root {
             --primary: #0f172a;
@@ -13,6 +13,7 @@
             --danger: #dc2626;
             --border: #e2e8f0;
             --bg: #f8fafc;
+            --neon-blue: #00d2ff;
         }
 
         body {
@@ -34,6 +35,19 @@
             max-width: 650px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
+        }
+
+        .brand-tag {
+            display: block;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 900;
+            letter-spacing: 0.5em;
+            color: var(--neon-blue);
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
         .header { text-align: center; margin-bottom: 32px; }
@@ -122,9 +136,10 @@
 <body>
 
 <div class="container">
+    <span class="brand-tag">SANGHARSH</span>
     <div class="header">
-        <h1>Predictor Pro v4.0</h1>
-        <p>Reliable JEE College Prediction Engine</p>
+        <h1>Predictor Pro v4.2</h1>
+        <p>JEE 2026 High-Precision Engine</p>
     </div>
 
     <div class="form-grid">
@@ -159,6 +174,7 @@
                 <option value="Rajasthan">Rajasthan</option>
                 <option value="Maharashtra">Maharashtra</option>
                 <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Kerala">Kerala</option>
             </select>
         </div>
         <div class="full-width">
@@ -196,16 +212,16 @@
 <script>
     const TOTAL_CANDIDATES = 1500000;
 
-    // SCALABLE DATASET STRUCTURE
     const collegeDB = [
-        { name: "NIT Trichy", state: "Tamil Nadu", branch: "Computer Science", cutoffs: { GEN: { os: 1500, hs: 5300 }, OBC: { os: 500, hs: 1800 }, SC: { os: 300, hs: 900 }}},
-        { name: "NIT Trichy", state: "Tamil Nadu", branch: "Electronics", cutoffs: { GEN: { os: 4200, hs: 11000 }, OBC: { os: 1400, hs: 4000 }}},
-        { name: "NIT Surathkal", state: "Karnataka", branch: "Computer Science", cutoffs: { GEN: { os: 2200, hs: 3800 }, OBC: { os: 750, hs: 1400 }}},
-        { name: "NIT Warangal", state: "Telangana", branch: "Computer Science", cutoffs: { GEN: { os: 2800, hs: 4200 }, OBC: { os: 900, hs: 1600 }}},
-        { name: "MNIT Jaipur", state: "Rajasthan", branch: "Computer Science", cutoffs: { GEN: { os: 5000, hs: 6800 }, OBC: { os: 1800, hs: 2500 }}},
-        { name: "MNNIT Allahabad", state: "Uttar Pradesh", branch: "Computer Science", cutoffs: { GEN: { os: 4000, hs: 6200 }}},
-        { name: "VNIT Nagpur", state: "Maharashtra", branch: "Mechanical", cutoffs: { GEN: { os: 25000, hs: 32000 }, OBC: { os: 8500, hs: 11000 }}},
-        { name: "IIIT Allahabad", state: "Uttar Pradesh", branch: "Information Technology", cutoffs: { GEN: { os: 5800, hs: 5800 }, OBC: { os: 2200, hs: 2200 }}}
+        { name: "NIT Tiruchirappalli", state: "Tamil Nadu", branch: "Computer Science", cutoffs: { GEN: { os: 1400, hs: 5000 }, OBC: { os: 800, hs: 2800 }, SC: { os: 5000, hs: 15000 }, ST: { os: 8000, hs: 25000 }}},
+        { name: "NIT Surathkal", state: "Karnataka", branch: "Computer Science", cutoffs: { GEN: { os: 2000, hs: 3500 }, OBC: { os: 900, hs: 2000 }}},
+        { name: "NIT Warangal", state: "Telangana", branch: "Computer Science", cutoffs: { GEN: { os: 2500, hs: 4000 }, OBC: { os: 1200, hs: 2500 }}},
+        { name: "NIT Calicut", state: "Kerala", branch: "Electronics", cutoffs: { GEN: { os: 10000, hs: 9000 }}},
+        { name: "VNIT Nagpur", state: "Maharashtra", branch: "Electronics", cutoffs: { GEN: { os: 13000, hs: 18000 }}},
+        { name: "MNIT Jaipur", state: "Rajasthan", branch: "Computer Science", cutoffs: { GEN: { os: 4500, hs: 6500 }, OBC: { os: 2200, hs: 4000 }}},
+        { name: "MNNIT Allahabad", state: "Uttar Pradesh", branch: "Computer Science", cutoffs: { GEN: { os: 3500, hs: 5500 }}},
+        { name: "NIT Rourkela", state: "Odisha", branch: "Mechanical", cutoffs: { GEN: { os: 22000, hs: 35000 }}},
+        { name: "IIIT Allahabad", state: "Uttar Pradesh", branch: "Information Technology", cutoffs: { GEN: { os: 12000, hs: 15000 }}}
     ];
 
     function updateUI() {
@@ -213,27 +229,30 @@
         document.getElementById('inputLabel').innerText = mode === 'marks' ? 'Marks (0-300)' : 'CRL Rank';
     }
 
-    // REALISTIC MAPPING (Interpolation logic)
     function getPercentile(m) {
-        if (m >= 280) return 99.99 - (300 - m) * 0.005;
-        if (m >= 240) return 99.7 - (280 - m) * 0.007;
-        if (m >= 200) return 99.1 - (240 - m) * 0.015;
-        if (m >= 160) return 98.0 - (200 - m) * 0.027;
-        if (m >= 120) return 95.0 - (160 - m) * 0.075;
-        if (m >= 80) return 88.0 - (120 - m) * 0.175;
-        return Math.max(0, m * 1.1);
+        if (m >= 280) return 99.98;
+        if (m >= 240) return 99.7;
+        if (m >= 190) return 99.0;
+        if (m >= 130) return 97.5;
+        if (m >= 100) return 96.0;
+        if (m >= 90)  return 94.4 + (m - 90) * 0.16; 
+        if (m >= 80)  return 92.8 + (m - 80) * 0.16;
+        if (m >= 70)  return 90.7 + (m - 70) * 0.21;
+        if (m >= 60)  return 86.9 + (m - 60) * 0.38;
+        if (m >= 50)  return 81.0 + (m - 50) * 0.59;
+        if (m >= 40)  return 73.3 + (m - 40) * 0.77;
+        return Math.max(0, m * 1.83);
     }
 
     function calculate() {
         const mode = document.getElementById('mode').value;
-        const inputVal = parseFloat(document.getElementById('val').value);
+        const valInput = parseFloat(document.getElementById('val').value);
         const userCat = document.getElementById('cat').value;
         const userState = document.getElementById('state').value;
         const userBranch = document.getElementById('branch').value;
 
-        // Validation
-        if (isNaN(inputVal) || inputVal < 0) {
-            alert("Please enter a valid value.");
+        if (isNaN(valInput) || valInput < 0) {
+            alert("Please enter a valid positive number.");
             return;
         }
 
@@ -243,64 +262,53 @@
         setTimeout(() => {
             let p, crl;
             if (mode === 'marks') {
-                p = getPercentile(inputVal);
+                p = getPercentile(valInput);
                 crl = Math.round(((100 - p) * TOTAL_CANDIDATES) / 100);
             } else {
-                crl = inputVal;
+                crl = valInput;
                 p = 100 - (crl / TOTAL_CANDIDATES * 100);
             }
 
             document.getElementById('outP').innerText = p.toFixed(2) + "%";
             document.getElementById('outR').innerText = crl.toLocaleString();
 
-            // DIRECT CATEGORY RANK ESTIMATION (Based on historical distribution)
-            // Note: DB cutoffs are now Category-specific, so we need an Est. Category Rank
-            let estCatRank = crl;
-            if (userCat === "OBC") estCatRank = crl * 0.28;
-            if (userCat === "SC") estCatRank = crl * 0.06;
-            if (userCat === "ST") estCatRank = crl * 0.02;
-            if (userCat === "EWS") estCatRank = crl * 0.12;
+            let catRankEquivalent = crl;
+            if (userCat === "OBC") catRankEquivalent = crl * 0.28;
+            if (userCat === "SC") catRankEquivalent = crl * 0.06;
+            if (userCat === "ST") catRankEquivalent = crl * 0.02;
+            if (userCat === "EWS") catRankEquivalent = crl * 0.12;
 
             let matches = [];
             collegeDB.forEach(col => {
-                // 1. EXACT BRANCH FILTER
                 if (userBranch !== "All" && col.branch !== userBranch) return;
 
-                // 2. QUOTA LOGIC
                 const quota = (userState === col.state) ? 'hs' : 'os';
-                
-                // 3. CATEGORY CHECK
                 const cutoff = col.cutoffs[userCat] ? col.cutoffs[userCat][quota] : col.cutoffs['GEN'][quota];
                 
                 if (!cutoff) return;
 
-                // Ratio for sorting and classification
-                const ratio = estCatRank / cutoff;
-
-                if (ratio <= 1.25) { // Show up to 25% beyond cutoff (Dream)
+                const ratio = catRankEquivalent / cutoff;
+                if (ratio <= 1.25) { 
                     matches.push({ ...col, cutoff, ratio });
                 }
             });
 
-            // 4. SORT BY BEST CHANCE (Lowest ratio first)
             matches.sort((a, b) => a.ratio - b.ratio);
 
             const listDiv = document.getElementById('list');
             listDiv.innerHTML = "";
 
             if (matches.length === 0) {
-                listDiv.innerHTML = `<div class="empty-state">No colleges found within range for your rank. Try selecting a broader branch preference.</div>`;
+                listDiv.innerHTML = `<div class="empty-state">No matching colleges for this rank. Try checking other branches.</div>`;
             } else {
                 matches.forEach(m => {
-                    let badge = "b-dream", status = "Dream";
-                    let border = "#e2e8f0";
-
-                    if (m.ratio <= 0.7) { badge = "b-vsafe"; status = "Very Safe"; border = "#10b981"; }
-                    else if (m.ratio <= 0.9) { badge = "b-safe"; status = "Safe"; border = "#3b82f6"; }
-                    else if (m.ratio <= 1.0) { badge = "b-target"; status = "Target"; border = "#f59e0b"; }
+                    let badge = "b-dream", status = "Dream", bCol = "#cbd5e1";
+                    if (m.ratio <= 0.7) { badge = "b-vsafe"; status = "Very Safe"; bCol = "#10b981"; }
+                    else if (m.ratio <= 0.9) { badge = "b-safe"; status = "Safe"; bCol = "#3b82f6"; }
+                    else if (m.ratio <= 1.0) { badge = "b-target"; status = "Target"; bCol = "#f59e0b"; }
 
                     listDiv.innerHTML += `
-                        <div class="college-card" style="border-left-color: ${border}">
+                        <div class="college-card" style="border-left-color: ${bCol}">
                             <div class="col-info">
                                 <h3>${m.name}</h3>
                                 <p>${m.branch} • ${m.state}</p>
@@ -318,7 +326,6 @@
         }, 500);
     }
 
-    // Enter Key Support
     document.getElementById('val').addEventListener('keypress', e => {
         if (e.key === 'Enter') calculate();
     });
