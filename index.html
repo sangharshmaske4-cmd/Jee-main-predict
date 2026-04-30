@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE Predictor Pro v4.2 | SANGHARSH</title>
+    <title>JEE Predictor Pro v4.3 | Sangharsh Maske Edition</title>
     <style>
         :root {
             --primary: #0f172a;
@@ -13,7 +13,6 @@
             --danger: #dc2626;
             --border: #e2e8f0;
             --bg: #f8fafc;
-            --neon-blue: #00d2ff;
         }
 
         body {
@@ -27,6 +26,19 @@
             color: var(--primary);
         }
 
+        /* BRAND TEXT STYLE */
+        .brand-header {
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.5rem;
+            color: #020617; /* Dark black-blue */
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px rgba(37, 99, 235, 0.4); /* Subtle blue neon glow */
+        }
+
         .container {
             background: white;
             padding: 32px;
@@ -35,19 +47,6 @@
             max-width: 650px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
-        }
-
-        .brand-tag {
-            display: block;
-            text-align: center;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: 900;
-            letter-spacing: 0.5em;
-            color: var(--neon-blue);
-            text-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            text-transform: uppercase;
         }
 
         .header { text-align: center; margin-bottom: 32px; }
@@ -67,7 +66,6 @@
             font-size: 1rem;
             box-sizing: border-box;
             transition: all 0.2s;
-            background: #fff;
         }
 
         input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
@@ -136,10 +134,10 @@
 <body>
 
 <div class="container">
-    <span class="brand-tag">SANGHARSH</span>
+    <div class="brand-header">SANGHARSH MASKE</div>
     <div class="header">
-        <h1>Predictor Pro v4.2</h1>
-        <p>JEE 2026 High-Precision Engine</p>
+        <h1>Predictor Pro v4.3</h1>
+        <p>JEE 2026 Precision Analytics Engine</p>
     </div>
 
     <div class="form-grid">
@@ -190,7 +188,7 @@
         </div>
     </div>
 
-    <button onclick="calculate()">Predict Colleges</button>
+    <button onclick="calculate()">Analyze My Chances</button>
 
     <div id="loader"><div class="spinner"></div></div>
 
@@ -229,19 +227,18 @@
         document.getElementById('inputLabel').innerText = mode === 'marks' ? 'Marks (0-300)' : 'CRL Rank';
     }
 
+    // 2026 ADJUSTED: 45 Marks ≈ 73.5%ile (mapped to approx 4 Lakh Rank out of 1.5M)
     function getPercentile(m) {
         if (m >= 280) return 99.98;
         if (m >= 240) return 99.7;
         if (m >= 190) return 99.0;
         if (m >= 130) return 97.5;
         if (m >= 100) return 96.0;
-        if (m >= 90)  return 94.4 + (m - 90) * 0.16; 
         if (m >= 80)  return 92.8 + (m - 80) * 0.16;
-        if (m >= 70)  return 90.7 + (m - 70) * 0.21;
         if (m >= 60)  return 86.9 + (m - 60) * 0.38;
-        if (m >= 50)  return 81.0 + (m - 50) * 0.59;
-        if (m >= 40)  return 73.3 + (m - 40) * 0.77;
-        return Math.max(0, m * 1.83);
+        if (m >= 45)  return 73.5 + (m - 45) * 0.89; // 45 marks anchor at ~73.5%
+        if (m >= 40)  return 71.0 + (m - 40) * 0.50; 
+        return Math.max(0, m * 1.77);
     }
 
     function calculate() {
@@ -252,7 +249,7 @@
         const userBranch = document.getElementById('branch').value;
 
         if (isNaN(valInput) || valInput < 0) {
-            alert("Please enter a valid positive number.");
+            alert("Enter a valid number.");
             return;
         }
 
@@ -281,25 +278,19 @@
             let matches = [];
             collegeDB.forEach(col => {
                 if (userBranch !== "All" && col.branch !== userBranch) return;
-
                 const quota = (userState === col.state) ? 'hs' : 'os';
                 const cutoff = col.cutoffs[userCat] ? col.cutoffs[userCat][quota] : col.cutoffs['GEN'][quota];
-                
                 if (!cutoff) return;
-
                 const ratio = catRankEquivalent / cutoff;
-                if (ratio <= 1.25) { 
-                    matches.push({ ...col, cutoff, ratio });
-                }
+                if (ratio <= 1.25) matches.push({ ...col, cutoff, ratio });
             });
 
             matches.sort((a, b) => a.ratio - b.ratio);
-
             const listDiv = document.getElementById('list');
             listDiv.innerHTML = "";
 
             if (matches.length === 0) {
-                listDiv.innerHTML = `<div class="empty-state">No matching colleges for this rank. Try checking other branches.</div>`;
+                listDiv.innerHTML = `<div class="empty-state">No colleges found within range. Try searching all branches.</div>`;
             } else {
                 matches.forEach(m => {
                     let badge = "b-dream", status = "Dream", bCol = "#cbd5e1";
@@ -320,7 +311,6 @@
                         </div>`;
                 });
             }
-
             document.getElementById('loader').style.display = 'none';
             document.getElementById('results').style.display = 'block';
         }, 500);
