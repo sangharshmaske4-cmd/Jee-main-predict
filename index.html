@@ -1,163 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>JEE Predictor Pro</title>
-<style>
-    body{
-        margin:0;
-        font-family: system-ui, Arial;
-        background:#0f172a;
-        color:white;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE Predictor Pro | Sangharsh Maske Edition</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --bg: #f1f5f9;
+        }
 
-    .app{
-        max-width:420px;
-        margin:auto;
-        padding:20px;
-    }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--primary);
+        }
 
-    .header{
-        text-align:center;
-        margin:20px 0;
-    }
+        .brand-header {
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.6rem;
+            color: #1e293b;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+        }
 
-    .header h1{
-        margin:0;
-        font-size:22px;
-    }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
 
-    .header p{
-        margin:5px 0;
-        font-size:12px;
-        opacity:0.7;
-    }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { font-size: 1.6rem; margin: 0; font-weight: 900; color: var(--primary); }
+        .header p { color: #64748b; font-size: 0.85rem; margin-top: 5px; }
 
-    .card{
-        background:#111c33;
-        padding:15px;
-        border-radius:14px;
-        margin-top:12px;
-        border:1px solid #1e293b;
-    }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        
+        label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
 
-    input, select{
-        width:100%;
-        padding:12px;
-        margin-top:10px;
-        border-radius:10px;
-        border:none;
-        background:#1e293b;
-        color:white;
-        outline:none;
-    }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
 
-    button{
-        width:100%;
-        margin-top:12px;
-        padding:12px;
-        border:none;
-        border-radius:10px;
-        background:#4f46e5;
-        color:white;
-        font-weight:600;
-        cursor:pointer;
-    }
+        input:focus, select:focus { border-color: var(--accent); outline: none; }
 
-    .result{
-        margin-top:15px;
-    }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-    .item{
-        background:#0b1220;
-        padding:12px;
-        border-radius:12px;
-        margin-top:10px;
-        border-left:3px solid #4f46e5;
-    }
+        button:hover { background: #000; transform: scale(1.01); }
 
-    .tag{
-        font-size:11px;
-        padding:2px 8px;
-        border-radius:6px;
-        background:#1e293b;
-        display:inline-block;
-        margin-bottom:6px;
-    }
+        /* Results Styling */
+        .results-area { margin-top: 25px; display: none; border-top: 2px dashed var(--border); padding-top: 20px; }
+        
+        .stat-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
 
-    .safe{color:#22c55e;font-weight:700;}
-    .mid{color:#f59e0b;font-weight:700;}
+        .stat-card {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
 
-</style>
+        .stat-card span { font-size: 0.65rem; text-transform: uppercase; opacity: 0.8; font-weight: 700; }
+        .stat-card div { font-size: 1.3rem; font-weight: 900; margin-top: 4px; }
+
+        .college-item {
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            transition: 0.2s;
+        }
+
+        .college-item:hover { border-color: var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        .prob-meter {
+            height: 4px;
+            width: 100%;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .prob-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease-out; }
+
+        .tag { font-size: 0.6rem; padding: 4px 8px; border-radius: 6px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
+        
+        .tag-vsafe { background: #dcfce7; color: #15803d; }
+        .tag-csab { background: #fef3c7; color: #b45309; }
+        .tag-hs { background: #e0f2fe; color: #0369a1; }
+
+        @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
-<div class="app">
-
+<div class="container">
+    <div class="brand-header">SANGHARSH MASKE</div>
     <div class="header">
-        <h1>🎯 JEE Predictor Pro</h1>
-        <p>Clean • Fast • Simple Analysis</p>
+        <h1>Predictor Pro v4.4</h1>
+        <p>Market Clearing Analysis for JEE 2026</p>
     </div>
 
-    <div class="card">
-        <input type="number" id="rank" placeholder="Enter CRL Rank">
-        
-        <select id="state">
-            <option>Home State</option>
-            <option>Other State</option>
-        </select>
-
-        <button onclick="run()">Predict Colleges</button>
+    <div class="form-grid">
+        <div style="grid-column: span 2;">
+            <label>NTA Score (Marks 0-300)</label>
+            <input type="number" id="marks" placeholder="Enter your marks">
+        </div>
+        <div>
+            <label>Category</label>
+            <select id="cat">
+                <option value="GEN">General</option>
+                <option value="OBC">OBC-NCL</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+            </select>
+        </div>
+        <div>
+            <label>Home State</label>
+            <select id="state">
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Other">Other State</option>
+            </select>
+        </div>
     </div>
 
-    <div class="result" id="out"></div>
+    <button onclick="simulate()">Simulate Seat Allocation</button>
 
+    <div class="results-area" id="results">
+        <div class="stat-summary">
+            <div class="stat-card">
+                <span>Est. Percentile</span>
+                <div id="outP">-</div>
+            </div>
+            <div class="stat-card">
+                <span>Est. CRL Rank</span>
+                <div id="outR">-</div>
+            </div>
+        </div>
+        <div id="collegeList"></div>
+    </div>
 </div>
 
 <script>
+    // 2026 Market Parameters
+    const CANDIDATE_POOL = 1600000; // Expected increase in 2026
 
-const colleges = [
-    {name:"NIT Trichy CSE", cutoff:1500},
-    {name:"NIT Surathkal CSE", cutoff:1800},
-    {name:"VNIT Nagpur ECE", cutoff:9500},
-    {name:"NIT Raipur IT", cutoff:19000},
-    {name:"IIIT Guwahati CSE", cutoff:22000},
-    {name:"GFTI Mizoram", cutoff:85000}
-];
+    const db = [
+        { n: "NIT Trichy", b: "CSE", s: "Tamil Nadu", c: { GEN: {os: 1500, hs: 5000}, SC: {os: 450, hs: 1100} } },
+        { n: "NIT Nagpur (VNIT)", b: "Electronics", s: "Maharashtra", c: { GEN: {os: 9000, hs: 12000}, SC: {os: 1600, hs: 3200} } },
+        { n: "NIT Nagaland", b: "Civil", s: "Nagaland", c: { GEN: {os: 55000, hs: 450000}, SC: {os: 8000, hs: 92000} } },
+        { n: "IIIT Guwahati", b: "CSE", s: "Assam", c: { GEN: {os: 22000, hs: 22000} } },
+        { n: "GFTI Mizoram", b: "ECE", s: "Mizoram", c: { GEN: {os: 85000, hs: 750000}, SC: {os: 15000, hs: 175000} } },
+        { n: "RCOEM Nagpur", b: "CSE", s: "Maharashtra", c: { GEN: {os: 35000, hs: 45000}, SC: {os: 40000, hs: 280000} } }
+    ];
 
-function run(){
-    let rank = parseInt(document.getElementById("rank").value);
-    let out = document.getElementById("out");
-
-    if(!rank){
-        out.innerHTML = "<div class='item'>Enter valid rank</div>";
-        return;
+    function getP(m) {
+        if(m >= 280) return 99.99;
+        if(m >= 200) return 99.1;
+        if(m >= 150) return 98.2;
+        if(m >= 100) return 95.8;
+        if(m >= 45)  return 73.5; // Anchor: 45 marks = 73.5%
+        return (m * 1.63).toFixed(2);
     }
 
-    let res = colleges
-        .filter(c => rank <= c.cutoff * 1.6)
-        .sort((a,b)=>a.cutoff-b.cutoff);
+    function simulate() {
+        const m = parseFloat(document.getElementById('marks').value);
+        const cat = document.getElementById('cat').value;
+        const hState = document.getElementById('state').value;
 
-    let html="";
+        if(!m && m !== 0) return alert("Enter marks");
 
-    res.forEach(c=>{
-        let safe = rank <= c.cutoff;
+        const p = getP(m);
+        const crl = Math.round(((100 - p) * CANDIDATE_POOL) / 100);
 
-        html += `
-        <div class="item">
-            <div class="tag">College</div>
-            <div><b>${c.name}</b></div>
-            <div class="${safe?'safe':'mid'}">
-                ${safe ? "High Chance" : "Moderate Chance"}
-            </div>
-            <small>Cutoff ~ ${c.cutoff}</small>
-        </div>
-        `;
-    });
+        document.getElementById('outP').innerText = p + "%";
+        document.getElementById('outR').innerText = crl.toLocaleString();
+        document.getElementById('results').style.display = 'block';
 
-    out.innerHTML = html || "<div class='item'>No matches found</div>";
-}
+        let listHtml = "";
+        let catRank = crl;
+        if(cat === "SC") catRank = crl * 0.055; // Approx category density
+        if(cat === "OBC") catRank = crl * 0.28;
 
+        db.forEach(col => {
+            const q = (col.s === hState) ? 'hs' : 'os';
+            const cutoff = col.c[cat]?.[q] || col.c['GEN'][q];
+            const ratio = catRank / cutoff;
+
+            if(ratio < 1.6) { // Show up to 1.6x for CSAB visibility
+                const prob = Math.max(5, Math.min(95, (1 / ratio) * 80));
+                const isHS = col.s === hState;
+                const tagClass = ratio <= 1 ? "tag-vsafe" : "tag-csab";
+                const tagName = ratio <= 1 ? "JoSAA Probable" : "CSAB Targeted";
+
+                listHtml += `
+                    <div class="college-item">
+                        <div style="display:flex; justify-content:space-between; align-items:start">
+                            <div>
+                                <span class="tag ${tagClass}">${tagName}</span>
+                                ${isHS ? '<span class="tag tag-hs">Home State Benefit</span>' : ''}
+                                <div style="font-weight:800; font-size:1.05rem;">${col.n}</div>
+                                <div style="font-size:0.8rem; color:#64748b;">${col.b} | Quota: ${q.toUpperCase()}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-size:0.75rem; font-weight:700; color:var(--accent)">${Math.round(prob)}% Match</div>
+                                <div style="font-size:0.7rem; color:#94a3b8;">Cutoff: ${cutoff.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div class="prob-meter">
+                            <div class="prob-fill" style="width:${prob}%; background:${ratio <= 1 ? 'var(--success)' : 'var(--warning)'}"></div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('collegeList').innerHTML = listHtml || "<div style='text-align:center; color:#64748b; padding:20px;'>No matches for this rank. Consider state-level counseling.</div>";
+    }
 </script>
 
 </body>
