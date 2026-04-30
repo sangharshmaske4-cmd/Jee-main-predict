@@ -267,3 +267,645 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE Predictor Pro | Advanced Analytics</title>
+<style>
+:root {
+--glass: rgba(255, 255, 255, 0.95);
+--primary: #0f172a;
+--accent: #3b82f6;
+--success: #10b981;
+--info: #3b82f6;
+--warning: #f59e0b;
+--danger: #ef4444;
+}
+body {
+font-family: 'Inter', system-ui, sans-serif;
+background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+margin: 0;
+color: var(--primary);
+padding: 20px 0;
+}
+.container {
+background: var(--glass);
+backdrop-filter: blur(10px);
+padding: 40px;
+border-radius: 24px;
+width: 90%;
+max-width: 550px;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.header { text-align: center; margin-bottom: 30px; }
+.header h1 { font-size: 1.5rem; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+.header p { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group { margin-bottom: 15px; }
+label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
+input, select {
+width: 100%;
+padding: 10px 14px;
+border-radius: 10px;
+border: 2px solid #e2e8f0;
+font-size: 0.95rem;
+transition: all 0.2s;
+box-sizing: border-box;
+}
+input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+button {
+width: 100%;
+padding: 14px;
+background: var(--primary);
+color: white;
+border: none;
+border-radius: 12px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: transform 0.2s, background 0.2s;
+margin-top: 10px;
+}
+button:hover { background: #1e293b; transform: translateY(-2px); }
+button:active { transform: translateY(0); }
+/* Results Styling */
+.results-area { margin-top: 30px; display: none; }
+.stat-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 20px;
+}
+.stat-card {
+background: #f8fafc;
+padding: 15px;
+border-radius: 12px;
+text-align: center;
+border: 1px solid #e2e8f0;
+}
+.stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+.stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+.result-meta {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 12px;
+}
+.result-meta span { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+.college-list { list-style: none; padding: 0; }
+.college-item {
+display: flex;
+flex-direction: column;
+padding: 15px;
+background: white;
+margin-bottom: 12px;
+border-radius: 12px;
+border-left: 5px solid #cbd5e1;
+box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+position: relative;
+}
+.col-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+.col-name { font-weight: 700; font-size: 0.95rem; color: var(--primary); max-width: 75%; }
+.col-details { font-size: 0.8rem; color: #64748b; display: flex; gap: 10px; }
+.col-cutoff { margin-top: 8px; font-size: 0.75rem; color: #94a3b8; font-family: monospace; }
+.badge {
+font-size: 0.65rem;
+padding: 4px 10px;
+border-radius: 99px;
+font-weight: 800;
+text-transform: uppercase;
+}
+.badge-very-safe { background: #dcfce7; color: #16a34a; border-left-color: #16a34a !important; }
+.badge-safe { background: #dbeafe; color: #2563eb; border-left-color: #2563eb !important; }
+.badge-target { background: #fef3c7; color: #d97706; border-left-color: #d97706 !important; }
+.badge-dream { background: #fee2e2; color: #ef4444; border-left-color: #ef4444 !important; }
+/* Loader */
+#loader {
+display: none;
+text-align: center;
+margin: 20px 0;
+}
+.spinner {
+width: 30px;
+height: 30px;
+border: 3px solid #f3f3f3;
+border-top: 3px solid var(--accent);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+display: inline-block;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 30px; color: #64748b; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>Predictor Pro v2.5</h1>
+<p>Advanced Seat Allocation Engine</p>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Input Type</label>
+<select id="inputType" onchange="togglePlaceholder()">
+<option value="marks">NTA Score (0-300)</option>
+<option value="rank">CRL Rank</option>
+</select>
+</div>
+<div class="form-group">
+<label id="inputLabel">Enter Marks</label>
+<input type="number" id="userInput" placeholder="e.g. 185">
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Category</label>
+<select id="userCat">
+<option value="GEN">General (Open)</option>
+<option value="OBC">OBC-NCL</option>
+<option value="EWS">EWS</option>
+<option value="SC">SC</option>
+<option value="ST">ST</option>
+</select>
+</div>
+<div class="form-group">
+<label>Home State</label>
+<input type="text" id="homeState" placeholder="e.g. Rajasthan">
+</div>
+</div>
+<div class="form-group">
+<label>Preferred Branch</label>
+<select id="branchFilter">
+<option value="All">All Branches</option>
+<option value="Computer Science">Computer Science</option>
+<option value="Electronics">Electronics</option>
+<option value="Mechanical">Mechanical</option>
+<option value="Civil">Civil</option>
+</select>
+</div>
+<button onclick="runAnalysis()">Analyze Chances</button>
+<div id="loader"><div class="spinner"></div></div>
+<div class="results-area" id="results">
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-label">Percentile</div>
+<div class="stat-value" id="resPercentile">-</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Est. CRL Rank</div>
+<div class="stat-value" id="resRank">-</div>
+</div>
+</div>
+<div class="result-meta">
+<span>Predicted Allocations</span>
+<span id="countBox">Found: 0</span>
+</div>
+<div class="college-list" id="collegeList"></div>
+</div>
+</div>
+<script>
+// Data Structure following Step 2
+const collegeDB = [
+{ name: "NIT Trichy", state: "Tamil Nadu", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 5000], os: [1, 1200] },
+OBC: { hs: [1000, 12000], os: [500, 4500] },
+SC: { hs: [2000, 25000], os: [1000, 15000] }
+}},
+{ name: "NIT Trichy", state: "Tamil Nadu", branch: "Electronics", cutoffs: {
+GEN: { hs: [5001, 12000], os: [1201, 4500] }
+}},
+{ name: "NIT Warangal", state: "Telangana", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 4000], os: [1, 2500] },
+OBC: { hs: [800, 10000], os: [400, 6000] }
+}},
+{ name: "NIT Surathkal", state: "Karnataka", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 3500], os: [1, 2000] }
+}},
+{ name: "NIT Rourkela", state: "Odisha", branch: "Mechanical", cutoffs: {
+GEN: { hs: [10000, 35000], os: [8000, 22000] }
+}},
+{ name: "MNIT Jaipur", state: "Rajasthan", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 6500], os: [1, 4500] },
+OBC: { hs: [1500, 14000], os: [1200, 8000] }
+}},
+{ name: "MNIT Jaipur", state: "Rajasthan", branch: "Electronics", cutoffs: {
+GEN: { hs: [6501, 15000], os: [4501, 10000] }
+}},
+{ name: "MNNIT Allahabad", state: "Uttar Pradesh", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 5500], os: [1, 3500] }
+}},
+{ name: "NIT Calicut", state: "Kerala", branch: "Civil", cutoffs: {
+GEN: { hs: [20000, 65000], os: [15000, 45000] }
+}},
+{ name: "VNIT Nagpur", state: "Maharashtra", branch: "Electronics", cutoffs: {
+GEN: { hs: [5000, 18000], os: [4000, 12000] }
+}},
+{ name: "NIT Durgapur", state: "West Bengal", branch: "Mechanical", cutoffs: {
+GEN: { hs: [15000, 45000], os: [12000, 32000] }
+}},
+{ name: "PEC Chandigarh", state: "Chandigarh", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 18000], os: [1, 10000] }
+}},
+{ name: "BIT Mesra", state: "Jharkhand", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 22000], os: [1, 15000] }
+}}
+];
+function togglePlaceholder() {
+const type = document.getElementById('inputType').value;
+const label = document.getElementById('inputLabel');
+const input = document.getElementById('userInput');
+label.innerText = type === 'marks' ? 'Enter Marks' : 'Enter CRL Rank';
+input.placeholder = type === 'marks' ? 'e.g. 185' : 'e.g. 25000';
+}
+function calculatePercentile(marks) {
+if (marks >= 280) return 99.9 + (marks - 280) * 0.005;
+if (marks >= 200) return 99.0 + (marks - 200) * 0.011;
+if (marks >= 150) return 97.0 + (marks - 150) * 0.04;
+if (marks >= 100) return 90.0 + (marks - 100) * 0.14;
+return Math.max(0, (marks / 100) * 90);
+}
+function runAnalysis() {
+const type = document.getElementById('inputType').value;
+const val = parseFloat(document.getElementById('userInput').value);
+const cat = document.getElementById('userCat').value;
+const homeState = document.getElementById('homeState').value.trim().toLowerCase();
+const branchFilter = document.getElementById('branchFilter').value;
+if (isNaN(val)) return alert("Please enter a valid rank/marks.");
+// Show loading
+document.getElementById('results').style.display = 'none';
+document.getElementById('loader').style.display = 'block';
+setTimeout(() => {
+let crl, percentile;
+if (type === 'marks') {
+percentile = calculatePercentile(val);
+crl = Math.round((100 - percentile) * 14000); // 1.4M candidates base
+} else {
+crl = val;
+percentile = 100 - (crl / 14000);
+}
+document.getElementById('resPercentile').innerText = percentile.toFixed(2) + "%";
+document.getElementById('resRank').innerText = crl.toLocaleString();
+const list = document.getElementById('collegeList');
+list.innerHTML = "";
+let matchCount = 0;
+collegeDB.forEach(col => {
+// 1. Branch Filter
+if (branchFilter !== "All" && col.branch !== branchFilter) return;
+// 2. Home State Logic
+const quota = (homeState !== "" && col.state.toLowerCase() === homeState) ? 'hs' : 'os';
+// Fallback to GEN if specific category data is missing
+const categoryData = col.cutoffs[cat] || col.cutoffs['GEN'];
+if (!categoryData || !categoryData[quota]) return;
+const [opening, closing] = categoryData[quota];
+// 3. Rank vs Closing Cutoff Condition
+if (crl <= closing * 1.2) {
+const ratio = crl / closing;
+let status = "";
+let badgeClass = "";
+if (ratio <= 0.6) { status = "Very Safe"; badgeClass = "badge-very-safe"; }
+else if (ratio <= 0.85) { status = "Safe"; badgeClass = "badge-safe"; }
+else if (ratio <= 1.0) { status = "Target"; badgeClass = "badge-target"; }
+else { status = "Dream"; badgeClass = "badge-dream"; }
+matchCount++;
+list.innerHTML += <li class="college-item ${badgeClass}"> <div class="col-header"> <span class="col-name">${col.name}</span> <span class="badge ${badgeClass}">${status}</span> </div> <div class="col-details"> <span><b>${col.branch}</b></span> <span>|</span> <span>${col.state} (${quota.toUpperCase()})</span> </div> <div class="col-cutoff"> Expected Cutoff: ${opening.toLocaleString()} - ${closing.toLocaleString()} </div> </li>;
+}
+});
+if (matchCount === 0) {
+list.innerHTML = <div class="empty-state">No colleges found for your rank and filters. Try changing the branch or checking CSAB rounds.</div>;
+}
+document.getElementById('countBox').innerText = Found: ${matchCount};
+document.getElementById('loader').style.display = 'none';
+document.getElementById('results').style.display = 'block';
+}, 600);
+}
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE Predictor Pro | Advanced Analytics</title>
+<style>
+:root {
+--glass: rgba(255, 255, 255, 0.95);
+--primary: #0f172a;
+--accent: #3b82f6;
+--success: #10b981;
+--info: #3b82f6;
+--warning: #f59e0b;
+--danger: #ef4444;
+}
+body {
+font-family: 'Inter', system-ui, sans-serif;
+background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+margin: 0;
+color: var(--primary);
+padding: 20px 0;
+}
+.container {
+background: var(--glass);
+backdrop-filter: blur(10px);
+padding: 40px;
+border-radius: 24px;
+width: 90%;
+max-width: 550px;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.header { text-align: center; margin-bottom: 30px; }
+.header h1 { font-size: 1.5rem; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+.header p { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group { margin-bottom: 15px; }
+label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
+input, select {
+width: 100%;
+padding: 10px 14px;
+border-radius: 10px;
+border: 2px solid #e2e8f0;
+font-size: 0.95rem;
+transition: all 0.2s;
+box-sizing: border-box;
+}
+input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+button {
+width: 100%;
+padding: 14px;
+background: var(--primary);
+color: white;
+border: none;
+border-radius: 12px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: transform 0.2s, background 0.2s;
+margin-top: 10px;
+}
+button:hover { background: #1e293b; transform: translateY(-2px); }
+button:active { transform: translateY(0); }
+/* Results Styling */
+.results-area { margin-top: 30px; display: none; }
+.stat-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 15px;
+margin-bottom: 20px;
+}
+.stat-card {
+background: #f8fafc;
+padding: 15px;
+border-radius: 12px;
+text-align: center;
+border: 1px solid #e2e8f0;
+}
+.stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+.stat-value { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+.result-meta {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 12px;
+}
+.result-meta span { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+.college-list { list-style: none; padding: 0; }
+.college-item {
+display: flex;
+flex-direction: column;
+padding: 15px;
+background: white;
+margin-bottom: 12px;
+border-radius: 12px;
+border-left: 5px solid #cbd5e1;
+box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+position: relative;
+}
+.col-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+.col-name { font-weight: 700; font-size: 0.95rem; color: var(--primary); max-width: 75%; }
+.col-details { font-size: 0.8rem; color: #64748b; display: flex; gap: 10px; }
+.col-cutoff { margin-top: 8px; font-size: 0.75rem; color: #94a3b8; font-family: monospace; }
+.badge {
+font-size: 0.65rem;
+padding: 4px 10px;
+border-radius: 99px;
+font-weight: 800;
+text-transform: uppercase;
+}
+.badge-very-safe { background: #dcfce7; color: #16a34a; border-left-color: #16a34a !important; }
+.badge-safe { background: #dbeafe; color: #2563eb; border-left-color: #2563eb !important; }
+.badge-target { background: #fef3c7; color: #d97706; border-left-color: #d97706 !important; }
+.badge-dream { background: #fee2e2; color: #ef4444; border-left-color: #ef4444 !important; }
+/* Loader */
+#loader {
+display: none;
+text-align: center;
+margin: 20px 0;
+}
+.spinner {
+width: 30px;
+height: 30px;
+border: 3px solid #f3f3f3;
+border-top: 3px solid var(--accent);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+display: inline-block;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 30px; color: #64748b; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>Predictor Pro v2.5</h1>
+<p>Advanced Seat Allocation Engine</p>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Input Type</label>
+<select id="inputType" onchange="togglePlaceholder()">
+<option value="marks">NTA Score (0-300)</option>
+<option value="rank">CRL Rank</option>
+</select>
+</div>
+<div class="form-group">
+<label id="inputLabel">Enter Marks</label>
+<input type="number" id="userInput" placeholder="e.g. 185">
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Category</label>
+<select id="userCat">
+<option value="GEN">General (Open)</option>
+<option value="OBC">OBC-NCL</option>
+<option value="EWS">EWS</option>
+<option value="SC">SC</option>
+<option value="ST">ST</option>
+</select>
+</div>
+<div class="form-group">
+<label>Home State</label>
+<input type="text" id="homeState" placeholder="e.g. Rajasthan">
+</div>
+</div>
+<div class="form-group">
+<label>Preferred Branch</label>
+<select id="branchFilter">
+<option value="All">All Branches</option>
+<option value="Computer Science">Computer Science</option>
+<option value="Electronics">Electronics</option>
+<option value="Mechanical">Mechanical</option>
+<option value="Civil">Civil</option>
+</select>
+</div>
+<button onclick="runAnalysis()">Analyze Chances</button>
+<div id="loader"><div class="spinner"></div></div>
+<div class="results-area" id="results">
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-label">Percentile</div>
+<div class="stat-value" id="resPercentile">-</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Est. CRL Rank</div>
+<div class="stat-value" id="resRank">-</div>
+</div>
+</div>
+<div class="result-meta">
+<span>Predicted Allocations</span>
+<span id="countBox">Found: 0</span>
+</div>
+<div class="college-list" id="collegeList"></div>
+</div>
+</div>
+<script>
+// Data Structure following Step 2
+const collegeDB = [
+{ name: "NIT Trichy", state: "Tamil Nadu", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 5000], os: [1, 1200] },
+OBC: { hs: [1000, 12000], os: [500, 4500] },
+SC: { hs: [2000, 25000], os: [1000, 15000] }
+}},
+{ name: "NIT Trichy", state: "Tamil Nadu", branch: "Electronics", cutoffs: {
+GEN: { hs: [5001, 12000], os: [1201, 4500] }
+}},
+{ name: "NIT Warangal", state: "Telangana", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 4000], os: [1, 2500] },
+OBC: { hs: [800, 10000], os: [400, 6000] }
+}},
+{ name: "NIT Surathkal", state: "Karnataka", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 3500], os: [1, 2000] }
+}},
+{ name: "NIT Rourkela", state: "Odisha", branch: "Mechanical", cutoffs: {
+GEN: { hs: [10000, 35000], os: [8000, 22000] }
+}},
+{ name: "MNIT Jaipur", state: "Rajasthan", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 6500], os: [1, 4500] },
+OBC: { hs: [1500, 14000], os: [1200, 8000] }
+}},
+{ name: "MNIT Jaipur", state: "Rajasthan", branch: "Electronics", cutoffs: {
+GEN: { hs: [6501, 15000], os: [4501, 10000] }
+}},
+{ name: "MNNIT Allahabad", state: "Uttar Pradesh", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 5500], os: [1, 3500] }
+}},
+{ name: "NIT Calicut", state: "Kerala", branch: "Civil", cutoffs: {
+GEN: { hs: [20000, 65000], os: [15000, 45000] }
+}},
+{ name: "VNIT Nagpur", state: "Maharashtra", branch: "Electronics", cutoffs: {
+GEN: { hs: [5000, 18000], os: [4000, 12000] }
+}},
+{ name: "NIT Durgapur", state: "West Bengal", branch: "Mechanical", cutoffs: {
+GEN: { hs: [15000, 45000], os: [12000, 32000] }
+}},
+{ name: "PEC Chandigarh", state: "Chandigarh", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 18000], os: [1, 10000] }
+}},
+{ name: "BIT Mesra", state: "Jharkhand", branch: "Computer Science", cutoffs: {
+GEN: { hs: [1, 22000], os: [1, 15000] }
+}}
+];
+function togglePlaceholder() {
+const type = document.getElementById('inputType').value;
+const label = document.getElementById('inputLabel');
+const input = document.getElementById('userInput');
+label.innerText = type === 'marks' ? 'Enter Marks' : 'Enter CRL Rank';
+input.placeholder = type === 'marks' ? 'e.g. 185' : 'e.g. 25000';
+}
+function calculatePercentile(marks) {
+if (marks >= 280) return 99.9 + (marks - 280) * 0.005;
+if (marks >= 200) return 99.0 + (marks - 200) * 0.011;
+if (marks >= 150) return 97.0 + (marks - 150) * 0.04;
+if (marks >= 100) return 90.0 + (marks - 100) * 0.14;
+return Math.max(0, (marks / 100) * 90);
+}
+function runAnalysis() {
+const type = document.getElementById('inputType').value;
+const val = parseFloat(document.getElementById('userInput').value);
+const cat = document.getElementById('userCat').value;
+const homeState = document.getElementById('homeState').value.trim().toLowerCase();
+const branchFilter = document.getElementById('branchFilter').value;
+if (isNaN(val)) return alert("Please enter a valid rank/marks.");
+// Show loading
+document.getElementById('results').style.display = 'none';
+document.getElementById('loader').style.display = 'block';
+setTimeout(() => {
+let crl, percentile;
+if (type === 'marks') {
+percentile = calculatePercentile(val);
+crl = Math.round((100 - percentile) * 14000); // 1.4M candidates base
+} else {
+crl = val;
+percentile = 100 - (crl / 14000);
+}
+document.getElementById('resPercentile').innerText = percentile.toFixed(2) + "%";
+document.getElementById('resRank').innerText = crl.toLocaleString();
+const list = document.getElementById('collegeList');
+list.innerHTML = "";
+let matchCount = 0;
+collegeDB.forEach(col => {
+// 1. Branch Filter
+if (branchFilter !== "All" && col.branch !== branchFilter) return;
+// 2. Home State Logic
+const quota = (homeState !== "" && col.state.toLowerCase() === homeState) ? 'hs' : 'os';
+// Fallback to GEN if specific category data is missing
+const categoryData = col.cutoffs[cat] || col.cutoffs['GEN'];
+if (!categoryData || !categoryData[quota]) return;
+const [opening, closing] = categoryData[quota];
+// 3. Rank vs Closing Cutoff Condition
+if (crl <= closing * 1.2) {
+const ratio = crl / closing;
+let status = "";
+let badgeClass = "";
+if (ratio <= 0.6) { status = "Very Safe"; badgeClass = "badge-very-safe"; }
+else if (ratio <= 0.85) { status = "Safe"; badgeClass = "badge-safe"; }
+else if (ratio <= 1.0) { status = "Target"; badgeClass = "badge-target"; }
+else { status = "Dream"; badgeClass = "badge-dream"; }
+matchCount++;
+list.innerHTML += <li class="college-item ${badgeClass}"> <div class="col-header"> <span class="col-name">${col.name}</span> <span class="badge ${badgeClass}">${status}</span> </div> <div class="col-details"> <span><b>${col.branch}</b></span> <span>|</span> <span>${col.state} (${quota.toUpperCase()})</span> </div> <div class="col-cutoff"> Expected Cutoff: ${opening.toLocaleString()} - ${closing.toLocaleString()} </div> </li>;
+}
+});
+if (matchCount === 0) {
+list.innerHTML = <div class="empty-state">No colleges found for your rank and filters. Try changing the branch or checking CSAB rounds.</div>;
+}
+document.getElementById('countBox').innerText = Found: ${matchCount};
+document.getElementById('loader').style.display = 'none';
+document.getElementById('results').style.display = 'block';
+}, 600);
+}
+</script>
+</body>
+</html>
